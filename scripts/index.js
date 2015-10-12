@@ -28,7 +28,6 @@ _temporaryCanvas.height = _backgroundCanvas.height;
 _temporaryCanvas.id = "temporary";
 var _temporaryContext = _temporaryCanvas.getContext('2d');
 
-
 var _createOffsetCanvases = createOffsetCanvases('spacesss', W, H);
 
 var _createOffsetCanvases2 = _slicedToArray(_createOffsetCanvases, 3);
@@ -61,6 +60,7 @@ var _mainPosition = {
     y: 1000
 };
 
+var _yOffset = 0;
 var t = 0;
 var DISPLACEMENT_MULTIPLIER = 20;
 function render() {
@@ -99,18 +99,25 @@ function render() {
   
   _backgroundContext.clearRect(0, 0, _backgroundCanvas.width, _backgroundCanvas.height);
   _backgroundContext.drawImage(_temporaryCanvas, 0, 0);
-  _backgroundContext.putImageData(imageData, _mainPosition.x, _mainPosition.y);
+  _backgroundContext.putImageData(imageData, _mainPosition.x, _mainPosition.y + _yOffset);
+  
   
   _compositeContext.clearRect(0, 0, _backgroundCanvas.width, _backgroundCanvas.height);
   _compositeContext.drawImage(_backgroundCanvas, 0, 0);
-  _compositeContext.drawImage(mainCanvas, _mainPosition.x, _mainPosition.y);
+  
+  _compositeContext.save();
+  _compositeContext.translate(_mainPosition.x + W /2, _mainPosition.y + H / 2);
+  _compositeContext.rotate(_mainAngle);
+  _compositeContext.translate(-_mainPosition.x - W / 2, -_mainPosition.y - H / 2);
+  _compositeContext.drawImage(mainCanvas, _mainPosition.x , _mainPosition.y);
+  _compositeContext.restore();
   
   t++;
   _mainAngle += (Math.PI / 512);
-  _mainPosition = {
+  /*_mainPosition = {
     x: Math.floor(200 + Math.cos(_mainAngle) * 100),
     y: _mainPosition.y //Math.floor(500 + Math.sin(_mainAngle) * 100)
-  };
+  };*/
   
   meter.tick();
   
@@ -151,10 +158,13 @@ function getSlopeFunction(angle) {
 }
 
 function createSliceCanvas(w, angle, image, y) {
+  _sliceContext.save();
   _sliceContext.clearRect(0, 0, _sliceCanvas.width, _sliceCanvas.height);
+  _sliceContext.translate(-w/2, -y/2);
   _sliceContext.rotate(angle);
+  _sliceContext.translate(w/2, y/2);
   _sliceContext.drawImage(image, 0, -y);
-  _sliceContext.rotate(-angle); // Put the angle back to zero
+  _sliceContext.restore();
 }
 
 function createOffsetCanvases(text, w, h) {
