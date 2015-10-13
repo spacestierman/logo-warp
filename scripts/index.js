@@ -53,7 +53,7 @@ ctx.globalCompositeOperation = 'multiply';
 
 body.appendChild(_compositeCanvas);
 body.appendChild(_backgroundCanvas);
-body.appendChild(_temporaryCanvas);
+//body.appendChild(_temporaryCanvas);
 body.appendChild(_foregroundCanvas);
 body.appendChild(mainCanvas);
 
@@ -66,9 +66,27 @@ var _distortionAngle = 0;
 
 var _mainAngle = 0;
 var _mainPosition = { 
-    x: 200,
+    x: 175,
     y: 800
 };
+
+var mousePosition = {
+  x: window.innerWidth / 2,
+  y: window.innerHeight / 2
+};
+var mouseIsDown = false;
+$(_compositeCanvas).on('mousemove', function(event) {
+  mousePosition.x = event.pageX;
+  mousePosition.y = event.pageY;
+});
+$(_compositeCanvas).on('mousedown', function(event) {
+  mouseIsDown = true;
+});
+$(_compositeCanvas).on('mouseup', function(event) {
+  mouseIsDown = false;
+});
+
+render();
 
 var _yOffset = 0;
 var t = 0;
@@ -97,7 +115,6 @@ function render() {
   _foregroundContext.translate(-_mainPosition.x - W / 2, -_mainPosition.y - H / 2);
   _foregroundContext.drawImage(mainCanvas, _mainPosition.x , _mainPosition.y);
   _foregroundContext.restore();
-  
  
   _temporaryContext.clearRect(0, 0, _temporaryCanvas.width, _temporaryCanvas.height);
   _temporaryContext.drawImage(_backgroundCanvas, 0, -1); // Shift the background up one pixel
@@ -108,7 +125,10 @@ function render() {
   var points = getLinePoints(_distortionAngle, _mainPosition.x + W / 2, -_mainPosition.y);
   if (points.length > 0)
   {
+    _backgroundContext.save();
+    _backgroundContext.globalCompositeOperation = "multiply";
     _backgroundContext.drawImage(_foregroundCanvas, 0, 0);
+    _backgroundContext.restore();
   
     var HEIGHT_OFFSET = 0.5; // This is how much of the vertical pixels we want to keep from the main asset.
     var left = points[0];
@@ -116,7 +136,7 @@ function render() {
     
     _backgroundContext.save();
     _backgroundContext.globalCompositeOperation = "source-over";
-    _backgroundContext.fillStyle = "white";
+    _backgroundContext.fillStyle = "rgba(255, 255, 255, 0.01)"; // The alpha here affects the "windshield wiper effect, controlling how much of the color stays on the screen.
     _backgroundContext.beginPath();
     _backgroundContext.moveTo(0, _backgroundCanvas.height);
     _backgroundContext.lineTo(0, left.y + HEIGHT_OFFSET);
@@ -128,17 +148,18 @@ function render() {
     _backgroundContext.restore();
   }
   
+  
+  _compositeContext.save();
+  _compositeContext.globalCompositeOperation = "source-over";
+  _compositeContext.clearRect(0, 0, _compositeCanvas.width, _compositeCanvas.height);
   _compositeContext.fillStyle = "white";
   _compositeContext.fillRect(0, 0, _compositeContext.width, _compositeContext.height);
   _compositeContext.drawImage(_backgroundCanvas, 0, 0);
   _compositeContext.drawImage(_foregroundCanvas, 0, 0);
-  
+  _compositeContext.restore();
   
   if (DEBUG)
   {
-    _foregroundContext.fillStyle = "red";
-    _foregroundContext.fillRect(_mainPosition.x + W / 2, _mainPosition.y + H / 2, 10, 10);
-    
     _compositeContext.fillStyle = "red";
     
     var points = getLinePoints(_distortionAngle, _mainPosition.x + W / 2, -_mainPosition.y);
@@ -147,24 +168,31 @@ function render() {
       for(i=0; i<points.length; i++)
       {
         var point = points[i];
-        _foregroundContext.fillRect(point.x, point.y, 1, 1);
         _compositeContext.fillRect(point.x, point.y, 1, 1);
       }
     }
   }
   t++;
-  _mainAngle = Math.sin(t / 100);
-  _distortionAngle = Math.cos(t / 100) / 2;
-  _mainPosition = {
-    x: Math.floor(200 + Math.cos(_mainAngle) * 200),
-    y: _mainPosition.y //Math.floor(500 + Math.sin(_mainAngle) * 100)
-  };
+  // _mainAngle = Math.sin(t / 100);
+  _distortionAngle = -Math.cos(t / 10) / 2;
+  
+  var multiplier = mouseIsDown ? 5.0 : 1.0; 
+  var normalizedX = (mousePosition.x / window.innerWidth);
+  if (normalizedX < 0.33) {
+    _mainAngle += (Math.PI / 256 * multiplier);
+  }
+  else if (normalizedX > 0.66) {
+    _mainAngle -= (Math.PI / 256 * multiplier);
+  }
+  
+  var normalizedY = 800 + (mousePosition.y / window.innerHeight);
+  _mainPosition.x = Math.floor(200 + Math.cos(_mainAngle) * 200);
+  _mainPosition.y = Math.round(normalizedY);
   
   meter.tick();
   
   requestAnimationFrame(render);
 }
-render();
 
 function normalizePointsToBoundingBox(points) {
   var axis = getBoundingAxis(points);
