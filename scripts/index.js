@@ -8,13 +8,19 @@ var meter = new FPSMeter(fpsContainer);
 var body = document.getElementById('body');
 var W = 400;
 var H = 150;
+var DEBUG = true;
 
 var _backgroundCanvas = document.createElement('canvas');
 _backgroundCanvas.width = window.innerWidth;
 _backgroundCanvas.height = window.innerHeight;
 _backgroundCanvas.id = "background";
 var _backgroundContext = _backgroundCanvas.getContext('2d');
-_backgroundContext.globalCompositeOperation = 'multiply';
+
+var _foregroundCanvas = document.createElement('canvas');
+_foregroundCanvas.width = _backgroundCanvas.width;
+_foregroundCanvas.height = _backgroundCanvas.height;
+_foregroundCanvas.id = "foreground";
+var _foregroundContext = _foregroundCanvas.getContext('2d');
 
 var _compositeCanvas = document.createElement('canvas');
 _compositeCanvas.width = _backgroundCanvas.width;
@@ -47,6 +53,7 @@ ctx.globalCompositeOperation = 'multiply';
 
 body.appendChild(_compositeCanvas);
 body.appendChild(_backgroundCanvas);
+body.appendChild(_foregroundCanvas);
 body.appendChild(mainCanvas);
 
 var _sliceCanvas = document.createElement('canvas');
@@ -54,18 +61,18 @@ _sliceCanvas.width = W;
 _sliceCanvas.height = 1;
 var _sliceContext = _sliceCanvas.getContext('2d');
 
+var _distortionAngle = 0;
+
 var _mainAngle = 0;
 var _mainPosition = { 
-    x: 100,
-    y: 1000
+    x: 200,
+    y: 800
 };
 
 var _yOffset = 0;
 var t = 0;
 var DISPLACEMENT_MULTIPLIER = 20;
 function render() {
-  var start = Date.now();
-  
   ctx.clearRect(0, 0, W, H);
   for (var y = 0; y < H; y += 1) {
     var angle = -Math.sin((t + y) / 10) / 10;
@@ -82,38 +89,62 @@ function render() {
     ctx.drawImage(_sliceCanvas, offset - displaceStrength, y);
   }
   
-  var imageData = _backgroundContext.createImageData(W, 1);
-  for (var x=0; x < W; x++) {
-    var pixel = ctx.getImageData(x, 0, 1, 1);
-    var pR = pixel.data[0];
-    var pG = pixel.data[1];
-    var pB = pixel.data[2];
-    var pA = pixel.data[3];
-    setPixel(imageData, x, 0, pR, pG, pB, pA);
-  }
+  _foregroundContext.clearRect(0, 0, _foregroundCanvas.width, _foregroundCanvas.height);
+  _foregroundContext.save();
+  _foregroundContext.translate(_mainPosition.x + W /2, _mainPosition.y + H / 2);
+  _foregroundContext.rotate(_mainAngle);
+  _foregroundContext.translate(-_mainPosition.x - W / 2, -_mainPosition.y - H / 2);
+  _foregroundContext.drawImage(mainCanvas, _mainPosition.x , _mainPosition.y);
+  _foregroundContext.restore();
   
   _temporaryContext.clearRect(0, 0, _temporaryCanvas.width, _temporaryCanvas.height);
-  var offsetX = 0; //Math.sin(t / 100);
-  var offsetY = -1; //Math.cos(t / 100) - 2;
-  _temporaryContext.drawImage(_backgroundCanvas, offsetX, offsetY);
+  _temporaryContext.drawImage(_backgroundCanvas, 0, -1); // Shift the background up one pixel
   
   _backgroundContext.clearRect(0, 0, _backgroundCanvas.width, _backgroundCanvas.height);
   _backgroundContext.drawImage(_temporaryCanvas, 0, 0);
-  _backgroundContext.putImageData(imageData, _mainPosition.x, _mainPosition.y + _yOffset);
   
+  var points = getLinePoints(_distortionAngle, _mainPosition.x + W / 2, -_mainPosition.y);
+  
+  if (points.length > 0) // Points can be zero for completely vertical lines that have infinite slope
+  {
+    var pixels = _foregroundContext.getImageData(0, 0, _foregroundCanvas.width, _foregroundCanvas.height);
+    for (var i=0; i < points.length; i++) {
+      var point = points[i];
+      var pixel = getPixel(pixels, point.x, point.y);
+      
+      // if (pixel.a > 0 && (pixel.r + pixel.g + pixel.b) > 0) {
+        var pixelData = _backgroundContext.createImageData(1, 1);
+        setPixel(pixelData, 0, 0, pixel.r, pixel.g, pixel.b, pixel.a);
+        _backgroundContext.putImageData(pixelData, point.x, point.y);
+      // }
+    }
+  }
   
   _compositeContext.clearRect(0, 0, _backgroundCanvas.width, _backgroundCanvas.height);
+  _compositeContext.drawImage(_foregroundCanvas, 0, 0);
   _compositeContext.drawImage(_backgroundCanvas, 0, 0);
   
-  _compositeContext.save();
-  _compositeContext.translate(_mainPosition.x + W /2, _mainPosition.y + H / 2);
-  _compositeContext.rotate(_mainAngle);
-  _compositeContext.translate(-_mainPosition.x - W / 2, -_mainPosition.y - H / 2);
-  _compositeContext.drawImage(mainCanvas, _mainPosition.x , _mainPosition.y);
-  _compositeContext.restore();
-  
+  if (DEBUG)
+  {
+    _foregroundContext.fillStyle = "red";
+    _foregroundContext.fillRect(_mainPosition.x + W / 2, _mainPosition.y + H / 2, 10, 10);
+    
+    _compositeContext.fillStyle = "red";
+    
+    var points = getLinePoints(_distortionAngle, _mainPosition.x + W / 2, -_mainPosition.y);
+    if (points.length > 0) // Points can be zero for completely vertical lines that have infinite slope
+    {
+      for(i=0; i<points.length; i++)
+      {
+        var point = points[i];
+        _foregroundContext.fillRect(point.x, point.y, 1, 1);
+        _compositeContext.fillRect(point.x, point.y, 1, 1);
+      }
+    }
+  }
   t++;
-  _mainAngle += (Math.PI / 512);
+  _mainAngle = Math.sin(t / 100) / 2;
+  _distortionAngle = Math.tan(t / 1000);
   /*_mainPosition = {
     x: Math.floor(200 + Math.cos(_mainAngle) * 100),
     y: _mainPosition.y //Math.floor(500 + Math.sin(_mainAngle) * 100)
@@ -122,27 +153,99 @@ function render() {
   meter.tick();
   
   requestAnimationFrame(render);
-  
-  var finish = Date.now();
-  var duration = finish - start;
-  var fps = Math.floor(1000 / duration);
-  console.log("duration: " + duration + "ms (" + fps + "fps) @(" + _mainPosition.x + ", " + _mainPosition.y + ")");
 }
 render();
 
+function normalizePointsToBoundingBox(points) {
+  var axis = getBoundingAxis(points);
+  var box = getBoundingBox(axis);
+  var mapped = [];
+  for(var i=0; i<points.length; i++) {
+    var point = points[i];
+    mapped.push({
+      x: axis.minX + (axis.maxX - point.x),
+      y: axis.minY + (axis.maxY - point.y)
+    });
+  }
+  
+  return {
+    axis: axis,
+    boundingBox: box,
+    normalizedPoints: mapped
+  };
+}
+
+function getBoundingBox(axis) {
+  return {
+    x: axis.minX,
+    y: axis.minY,
+    width: axis.maxX - axis.minX,
+    height: axis.maxY - axis.minY
+  };
+}
+
+function getBoundingAxis(points) {
+  var minX = 0;
+  var minY = 0;
+  var maxX = 0;
+  var maxY = 0;
+  for (var i=0; i<points.length; i++)
+  {
+    var point = points[i];
+    if (point.x < minX) {
+      minX = point.x;
+    }
+    if (point.x > maxX) {
+      maxX = point.x;
+    }
+    
+    if (point.y < minY) {
+      minY = point.y;
+    }
+    if (point.y > maxY) {
+      maxY = point.y;
+    }
+  }
+  
+  return {
+    minX: minX,
+    minY: minY,
+    maxX: maxX,
+    maxY: maxY
+  };
+}
+
 function setPixel(imageData, x, y, r, g, b, a) {
     var index = (x + y * imageData.width) * 4;
-    imageData.data[index+0] = r;
+    imageData.data[index] = r;
     imageData.data[index+1] = g;
     imageData.data[index+2] = b;
     imageData.data[index+3] = a;
 }
 
-function getLinePixels(angle) {
-  var slopeFormula = getSlopeFunction(angle);
+function getPixel(imageData, x, y, r, g, b, a) {
+  var index = (x + y * imageData.width) * 4;
+  return {
+    r: imageData.data[index],
+    g: imageData.data[index+1],
+    b: imageData.data[index+2],
+    a: imageData.data[index+3]
+  }
+}
+
+function getLinePoints(angle, xIntercept, yIntercept) {
+  angle = angle % (Math.PI * 2);
+  
+  var vertical = Math.PI / 2;
+  var verticalAlternate = Math.PI * 1.5;
+  if (Math.abs(angle - vertical) <= 0.001 || Math.abs(angle - verticalAlternate) <= 0.001) {
+    return [];
+  }
+  
+  var slopeFormula = getSlopeFunction(angle, xIntercept, yIntercept);
   var points = [];
-  for (var x=0; x < W; x++) {
-    var y = slopeFormula(x);
+  for (var x=0; x < _backgroundCanvas.width; x++) {
+    var y = Math.round(slopeFormula(x)); // Flooring or ceiling or rounding these coordinates leaves artifacts.
     points.push({
       x: x, y: y
     });
@@ -150,10 +253,10 @@ function getLinePixels(angle) {
   return points;
 }
 
-function getSlopeFunction(angle) {
+function getSlopeFunction(angle, xIntercept, yIntercept) {
   return function(x) {
     var slope = Math.tan(angle);
-    return slope * x;
+    return slope * (x - xIntercept) - yIntercept;
   }
 }
 
