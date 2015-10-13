@@ -15,6 +15,7 @@ _backgroundCanvas.width = window.innerWidth;
 _backgroundCanvas.height = window.innerHeight;
 _backgroundCanvas.id = "background";
 var _backgroundContext = _backgroundCanvas.getContext('2d');
+_backgroundContext.globalCompositeOperation = "multiply";
 
 var _foregroundCanvas = document.createElement('canvas');
 _foregroundCanvas.width = _backgroundCanvas.width;
@@ -101,27 +102,37 @@ function render() {
   _temporaryContext.clearRect(0, 0, _temporaryCanvas.width, _temporaryCanvas.height);
   _temporaryContext.drawImage(_backgroundCanvas, 0, -1); // Shift the background up one pixel
   
-  
   _backgroundContext.clearRect(0, 0, _backgroundCanvas.width, _backgroundCanvas.height);
   _backgroundContext.drawImage(_temporaryCanvas, 0, 0);
   
   var points = getLinePoints(_distortionAngle, _mainPosition.x + W / 2, -_mainPosition.y);
-  
-  if (points.length > 0) // Points can be empty for completely vertical lines that have infinite slope
+  if (points.length > 0)
   {
-    var pixels = _foregroundContext.getImageData(0, 0, _foregroundCanvas.width, _foregroundCanvas.height);
-    for (var i=0; i < points.length; i++) {
-      var point = points[i];
-      var pixel = getPixel(pixels, point.x, point.y);
-      var pixelData = _backgroundContext.createImageData(1, 1);
-      setPixel(pixelData, 0, 0, pixel.r, pixel.g, pixel.b, pixel.a);
-      _backgroundContext.putImageData(pixelData, point.x, point.y);
-    }
+    _backgroundContext.drawImage(_foregroundCanvas, 0, 0);
+  
+    var HEIGHT_OFFSET = 0.5; // This is how much of the vertical pixels we want to keep from the main asset.
+    var left = points[0];
+    var right = points[points.length - 1];
+    
+    _backgroundContext.save();
+    _backgroundContext.globalCompositeOperation = "source-over";
+    _backgroundContext.fillStyle = "white";
+    _backgroundContext.beginPath();
+    _backgroundContext.moveTo(0, _backgroundCanvas.height);
+    _backgroundContext.lineTo(0, left.y + HEIGHT_OFFSET);
+    _backgroundContext.lineTo(_backgroundCanvas.width, right.y + HEIGHT_OFFSET);
+    _backgroundContext.lineTo(_backgroundCanvas.width, _backgroundCanvas.height);
+    _backgroundContext.lineTo(0, _backgroundCanvas.height);
+    _backgroundContext.closePath();
+    _backgroundContext.fill();
+    _backgroundContext.restore();
   }
   
-  _compositeContext.clearRect(0, 0, _backgroundCanvas.width, _backgroundCanvas.height);
-  _compositeContext.drawImage(_foregroundCanvas, 0, 0);
+  _compositeContext.fillStyle = "white";
+  _compositeContext.fillRect(0, 0, _compositeContext.width, _compositeContext.height);
   _compositeContext.drawImage(_backgroundCanvas, 0, 0);
+  _compositeContext.drawImage(_foregroundCanvas, 0, 0);
+  
   
   if (DEBUG)
   {
@@ -142,8 +153,8 @@ function render() {
     }
   }
   t++;
-  _mainAngle = Math.sin(t / 100) / 10;
-  _distortionAngle = _mainAngle;
+  _mainAngle = Math.sin(t / 100);
+  _distortionAngle = Math.cos(t / 100) / 2;
   _mainPosition = {
     x: Math.floor(200 + Math.cos(_mainAngle) * 200),
     y: _mainPosition.y //Math.floor(500 + Math.sin(_mainAngle) * 100)
