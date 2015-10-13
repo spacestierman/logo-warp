@@ -8,7 +8,7 @@ var meter = new FPSMeter(fpsContainer);
 var body = document.getElementById('body');
 var W = 400;
 var H = 150;
-var DEBUG = false;
+var DEBUG = true;
 
 var _backgroundCanvas = document.createElement('canvas');
 _backgroundCanvas.width = window.innerWidth;
@@ -52,6 +52,7 @@ ctx.globalCompositeOperation = 'multiply';
 
 body.appendChild(_compositeCanvas);
 body.appendChild(_backgroundCanvas);
+body.appendChild(_temporaryCanvas);
 body.appendChild(_foregroundCanvas);
 body.appendChild(mainCanvas);
 
@@ -96,8 +97,10 @@ function render() {
   _foregroundContext.drawImage(mainCanvas, _mainPosition.x , _mainPosition.y);
   _foregroundContext.restore();
   
+ 
   _temporaryContext.clearRect(0, 0, _temporaryCanvas.width, _temporaryCanvas.height);
   _temporaryContext.drawImage(_backgroundCanvas, 0, -1); // Shift the background up one pixel
+  
   
   _backgroundContext.clearRect(0, 0, _backgroundCanvas.width, _backgroundCanvas.height);
   _backgroundContext.drawImage(_temporaryCanvas, 0, 0);
@@ -110,7 +113,6 @@ function render() {
     for (var i=0; i < points.length; i++) {
       var point = points[i];
       var pixel = getPixel(pixels, point.x, point.y);
-      
       var pixelData = _backgroundContext.createImageData(1, 1);
       setPixel(pixelData, 0, 0, pixel.r, pixel.g, pixel.b, pixel.a);
       _backgroundContext.putImageData(pixelData, point.x, point.y);
@@ -140,12 +142,12 @@ function render() {
     }
   }
   t++;
-  _mainAngle = Math.sin(t / 100) / 2;
+  _mainAngle = Math.sin(t / 100) / 10;
   _distortionAngle = _mainAngle;
-  /*_mainPosition = {
-    x: Math.floor(200 + Math.cos(_mainAngle) * 100),
+  _mainPosition = {
+    x: Math.floor(200 + Math.cos(_mainAngle) * 200),
     y: _mainPosition.y //Math.floor(500 + Math.sin(_mainAngle) * 100)
-  };*/
+  };
   
   meter.tick();
   
@@ -242,7 +244,7 @@ function getLinePoints(angle, xIntercept, yIntercept) {
   var slopeFormula = getSlopeFunction(angle, xIntercept, yIntercept);
   var points = [];
   for (var x=0; x < _backgroundCanvas.width; x++) {
-    var y = Math.round(slopeFormula(x)); // Flooring or ceiling or rounding these coordinates leaves artifacts.
+    var y = Math.floor(slopeFormula(x)); // Flooring or ceiling or rounding these coordinates leaves artifacts.
     points.push({
       x: x, y: y
     });
