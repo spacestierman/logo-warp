@@ -75,6 +75,10 @@ var mousePosition = {
   y: window.innerHeight / 2
 };
 var mouseIsDown = false;
+var _velocityVector = {
+  x: 0.0,
+  y: 1.0
+};
 $(_compositeCanvas).on('mousemove', function(event) {
   mousePosition.x = event.pageX;
   mousePosition.y = event.pageY;
@@ -110,6 +114,7 @@ function render() {
   
   _foregroundContext.clearRect(0, 0, _foregroundCanvas.width, _foregroundCanvas.height);
   _foregroundContext.save();
+  _foregroundContext.globalCompositeOperation = "source-over";
   _foregroundContext.translate(_mainPosition.x + W /2, _mainPosition.y + H / 2);
   _foregroundContext.rotate(_mainAngle);
   _foregroundContext.translate(-_mainPosition.x - W / 2, -_mainPosition.y - H / 2);
@@ -117,7 +122,7 @@ function render() {
   _foregroundContext.restore();
  
   _temporaryContext.clearRect(0, 0, _temporaryCanvas.width, _temporaryCanvas.height);
-  _temporaryContext.drawImage(_backgroundCanvas, 0, -1); // Shift the background up one pixel
+  _temporaryContext.drawImage(_backgroundCanvas, 0, -_velocityVector.y); // Shift the background around
   
   _backgroundContext.clearRect(0, 0, _backgroundCanvas.width, _backgroundCanvas.height);
   _backgroundContext.drawImage(_temporaryCanvas, 0, 0);
@@ -180,14 +185,33 @@ function render() {
   var normalizedX = (mousePosition.x / window.innerWidth);
   if (normalizedX < 0.33) {
     _mainAngle += (Math.PI / 256 * multiplier);
+    _velocityVector.x = 5.0;
   }
   else if (normalizedX > 0.66) {
     _mainAngle -= (Math.PI / 256 * multiplier);
+    _velocityVector.x = -5.0;
+  }
+  else {
+    _velocityVector.x = 0.0;
   }
   
   var normalizedY = 800 + (mousePosition.y / window.innerHeight);
-  _mainPosition.x = Math.floor(200 + Math.cos(_mainAngle) * 200);
+  _mainPosition.x += _velocityVector.x;
+  if (_mainPosition.x < 0) {
+    _mainPosition.x = 0;
+  }
+  else if (_mainPosition.x > window.innerWidth - W) {
+    _mainPosition.x = window.innerWidth - W;
+  }
+  
   _mainPosition.y = Math.round(normalizedY);
+  
+  if (mouseIsDown) {
+    _velocityVector.y = 3.0;
+  }
+  else {
+    _velocityVector.y = 1.0;
+  }
   
   meter.tick();
   
