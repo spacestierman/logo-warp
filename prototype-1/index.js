@@ -2,13 +2,10 @@
 
 var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i['return']) _i['return'](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError('Invalid attempt to destructure non-iterable instance'); } }; })();
 
-var fpsContainer = document.getElementById('fpsContainer');
-var meter = new FPSMeter(fpsContainer);
-
 var body = document.getElementById('body');
 var W = 400;
 var H = 150;
-var DEBUG = true;
+var DEBUG = false;
 
 var _backgroundCanvas = document.createElement('canvas');
 _backgroundCanvas.width = window.innerWidth;
@@ -35,27 +32,22 @@ _temporaryCanvas.height = _backgroundCanvas.height;
 _temporaryCanvas.id = "temporary";
 var _temporaryContext = _temporaryCanvas.getContext('2d');
 
-var _createOffsetCanvases = createOffsetCanvases('space150', W, H);
-
-var _createOffsetCanvases2 = _slicedToArray(_createOffsetCanvases, 3);
-
-var r = _createOffsetCanvases2[0];
-var g = _createOffsetCanvases2[1];
-var b = _createOffsetCanvases2[2];
-
-var mainCanvas = document.createElement('canvas');
-mainCanvas.height = H;
-mainCanvas.width = W;
-mainCanvas.id = "main";
-var ctx = mainCanvas.getContext('2d');
-ctx.globalCompositeOperation = 'multiply';
-
+var _undulatingLogo = new UndulatingLogo("space150", W, H, "main");
+var _undulatingCanvas = _undulatingLogo.getCanvas();
+var _undulatingCanvasRed = _undulatingLogo.getRedCanvas();
+var _undulatingCanvasGreen = _undulatingLogo.getGreenCanvas();
+var _undulatingCanvasBlue = _undulatingLogo.getBlueCanvas();
+var _undulatingCanvasSlice = _undulatingLogo.getSliceCanvas();
 
 body.appendChild(_compositeCanvas);
-body.appendChild(_backgroundCanvas);
+//body.appendChild(_backgroundCanvas);
 //body.appendChild(_temporaryCanvas);
-body.appendChild(_foregroundCanvas);
-body.appendChild(mainCanvas);
+//body.appendChild(_foregroundCanvas);
+//body.appendChild(mainCanvas);
+body.appendChild(_undulatingCanvas);
+body.appendChild(_undulatingCanvasRed);
+body.appendChild(_undulatingCanvasGreen);
+body.appendChild(_undulatingCanvasBlue);
 
 var _sliceCanvas = document.createElement('canvas');
 _sliceCanvas.width = W;
@@ -70,10 +62,13 @@ var _mainPosition = {
     y: 800
 };
 
+
+var DEFAULT_WIPE_ALPHA = 1.0;
 var mousePosition = {
   x: window.innerWidth / 2,
   y: window.innerHeight / 2
 };
+var _wipeAlpha = DEFAULT_WIPE_ALPHA;
 var mouseIsDown = false;
 var _velocityVector = {
   x: 0.0,
@@ -93,24 +88,14 @@ $(_compositeCanvas).on('mouseup', function(event) {
 render();
 
 var _yOffset = 0;
+var _startedAt = new Date().getTime();
+var _lastRenderTicks = new Date().getTime();
 var t = 0;
 var DISPLACEMENT_MULTIPLIER = 20;
 function render() {
-  ctx.clearRect(0, 0, W, H);
-  for (var y = 0; y < H; y += 1) {
-    var angle = -Math.sin((t + y) / 10) / 10;
-    var offset = Math.cos(t / 10);
-    var displaceStrength = angle * DISPLACEMENT_MULTIPLIER;
-    
-    createSliceCanvas(W, angle, r, y);
-    ctx.drawImage(_sliceCanvas, offset + displaceStrength, y);
-    
-    createSliceCanvas(W, angle, g, y);
-    ctx.drawImage(_sliceCanvas, offset, y);
-    
-    createSliceCanvas(W, angle, b, y);
-    ctx.drawImage(_sliceCanvas, offset - displaceStrength, y);
-  }
+  var nowTicks = new Date().getTime();
+  var totalElapsedMilliseconds = _startedAt - _lastRenderTicks;
+  _undulatingLogo.update(totalElapsedMilliseconds);
   
   _foregroundContext.clearRect(0, 0, _foregroundCanvas.width, _foregroundCanvas.height);
   _foregroundContext.save();
@@ -118,7 +103,7 @@ function render() {
   _foregroundContext.translate(_mainPosition.x + W /2, _mainPosition.y + H / 2);
   _foregroundContext.rotate(_mainAngle);
   _foregroundContext.translate(-_mainPosition.x - W / 2, -_mainPosition.y - H / 2);
-  _foregroundContext.drawImage(mainCanvas, _mainPosition.x , _mainPosition.y);
+  _foregroundContext.drawImage(_undulatingCanvas, _mainPosition.x , _mainPosition.y);
   _foregroundContext.restore();
  
   _temporaryContext.clearRect(0, 0, _temporaryCanvas.width, _temporaryCanvas.height);
@@ -135,13 +120,13 @@ function render() {
     _backgroundContext.drawImage(_foregroundCanvas, 0, 0);
     _backgroundContext.restore();
   
-    var HEIGHT_OFFSET = 0.5; // This is how much of the vertical pixels we want to keep from the main asset.
+    var HEIGHT_OFFSET = 20; // This is how much of the vertical pixels we want to keep from the main asset.
     var left = points[0];
     var right = points[points.length - 1];
     
     _backgroundContext.save();
     _backgroundContext.globalCompositeOperation = "source-over";
-    _backgroundContext.fillStyle = "rgba(255, 255, 255, 0.01)"; // The alpha here affects the "windshield wiper effect, controlling how much of the color stays on the screen.
+    _backgroundContext.fillStyle = "rgba(255, 255, 255, " + _wipeAlpha + ")"; // The alpha here affects the "windshield wiper effect, controlling how much of the color stays on the screen.
     _backgroundContext.beginPath();
     _backgroundContext.moveTo(0, _backgroundCanvas.height);
     _backgroundContext.lineTo(0, left.y + HEIGHT_OFFSET);
@@ -152,7 +137,6 @@ function render() {
     _backgroundContext.fill();
     _backgroundContext.restore();
   }
-  
   
   _compositeContext.save();
   _compositeContext.globalCompositeOperation = "source-over";
@@ -177,9 +161,11 @@ function render() {
       }
     }
   }
+  
   t++;
+  _lastRenderTicks = new Date().getTime();
   // _mainAngle = Math.sin(t / 100);
-  _distortionAngle = -Math.cos(t / 10) / 2;
+  _distortionAngle = -Math.cos(t / 10) / 200;
   
   var multiplier = mouseIsDown ? 5.0 : 1.0; 
   var normalizedX = (mousePosition.x / window.innerWidth);
@@ -208,12 +194,12 @@ function render() {
   
   if (mouseIsDown) {
     _velocityVector.y = 3.0;
+    _wipeAlpha = 0.01;
   }
   else {
     _velocityVector.y = 1.0;
+    _wipeAlpha = DEFAULT_WIPE_ALPHA;
   }
-  
-  meter.tick();
   
   requestAnimationFrame(render);
 }
@@ -320,49 +306,4 @@ function getSlopeFunction(angle, xIntercept, yIntercept) {
     var slope = Math.tan(angle);
     return slope * (x - xIntercept) - yIntercept;
   }
-}
-
-function createSliceCanvas(w, angle, image, y) {
-  _sliceContext.save();
-  _sliceContext.clearRect(0, 0, _sliceCanvas.width, _sliceCanvas.height);
-  _sliceContext.translate(-w/2, -y/2);
-  _sliceContext.rotate(angle);
-  _sliceContext.translate(w/2, y/2);
-  _sliceContext.drawImage(image, 0, -y);
-  _sliceContext.restore();
-}
-
-function createOffsetCanvases(text, w, h) {
-  var r = document.createElement('canvas');
-  r.height = h;
-  r.width = w;
-  r.getContext('2d').font = '80px sans-serif';
-    
-  var g = document.createElement('canvas');
-  g.height = h;
-  g.width = w;
-  g.getContext('2d').font = '80px sans-serif';
-    
-  var b = document.createElement('canvas');
-  b.height = h;
-  b.width = w;
-  b.getContext('2d').font = '80px sans-serif';
-    
-  var all = [r, g, b];
-  var rCtx = r.getContext('2d');
-  var gCtx = g.getContext('2d');
-  var bCtx = b.getContext('2d');
-  rCtx.fillStyle = 'red';
-  gCtx.fillStyle = 'green';
-  bCtx.fillStyle = 'blue';
-
-  var textWidth = 400;
-
-  var textHeight = textWidth / text.length;
-  var textX = w / 2 - textWidth / 2;
-  var textY = h / 2 - textHeight / 2;
-  rCtx.fillText(text, textX, textY);
-  gCtx.fillText(text, textX, textY);
-  bCtx.fillText(text, textX, textY);
-  return all;
 }

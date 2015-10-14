@@ -1,0 +1,48 @@
+
+<html>
+  <head>
+    <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+    }
+    body {
+      background: #000000;
+    }
+    
+    canvas { 
+      background: white;
+      display: block;
+      margin: 1px auto;
+    }
+    
+    #fpsContainer {
+      position: fixed;
+      top:0;
+      left: 0;
+    }
+    </style>
+  </head>
+  <body id="body">
+    <div id="fpsContainer"></div>
+    <script src="../assets/scripts/jquery-1.11.3.min.js"></script>
+    <script src="../assets/scripts/fpsmeter.min.js"></script>
+    <script>
+      $( document ).ready(function() {
+        var fpsContainer = document.getElementById('fpsContainer');
+        var meter = new FPSMeter(fpsContainer);
+        
+        function render() {
+          requestAnimationFrame(render);
+          meter.tick();
+        }
+        
+        render();
+      });
+    </script>
+    
+    <script src="../assets/scripts/classes/UndulatingLogo.js"></script>
+    <script src="index.js"></script>
+    
+  </body>
+</html>
