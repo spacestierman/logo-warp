@@ -1,7 +1,6 @@
-var UndulatingLogo = function(text, width, height, id) {
+var UndulatingLogo = function(image, width, height, id) {
 	this.SLICE_CANVAS_HEIGHT = 1;
-	
-	this.text = text;
+	this.DISPLACEMENT_MULTIPLIER = 20;
 	
 	this._canvas = document.createElement('canvas');
 	this._canvas.width = width;
@@ -16,31 +15,22 @@ var UndulatingLogo = function(text, width, height, id) {
 	this._sliceCanvas.height = this.SLICE_CANVAS_HEIGHT;
 	this._sliceContext = this._sliceCanvas.getContext('2d');
 	
-	this._redCanvas = this._createOffsetCanvas(this.text, width, height, "red");
-	this._greenCanvas = this._createOffsetCanvas(this.text, width, height, "green");
-	this._blueCanvas = this._createOffsetCanvas(this.text, width, height, "blue");
+	this._blackCanvas = image;
 };
 
 UndulatingLogo.prototype = {
-	update: function(elapsedMilliseconds) {
+	render: function(elapsedMilliseconds) {
 		this._context.clearRect(0, 0, this._canvas.width, this._canvas.height);
 		
 		var shrinkageFactor = 2;
 		for (var y = -32; y < this._canvas.height / shrinkageFactor; y += 1) {
 			var angle = -Math.sin((elapsedMilliseconds / 100 + y) / 10) / 10;
 			var offset = Math.cos(elapsedMilliseconds / 10) / 5;
-			var displaceStrength = angle * DISPLACEMENT_MULTIPLIER;
+			var displaceStrength = angle * this.DISPLACEMENT_MULTIPLIER;
 			
 			var drawAtY = y + 16;
-			this._drawToSliceCanvas(angle, this._redCanvas, y * shrinkageFactor);
+			this._drawToSliceCanvas(angle, this._blackCanvas, y * shrinkageFactor);
 			this._context.drawImage(this._sliceCanvas, offset + displaceStrength, drawAtY);
-			
-			var GREEN_EFFECT = 1;  // Makes a little more green appear when animating
-			this._drawToSliceCanvas(angle, this._greenCanvas, y * shrinkageFactor + GREEN_EFFECT);
-			this._context.drawImage(this._sliceCanvas, 0, drawAtY);
-			
-			this._drawToSliceCanvas(angle, this._blueCanvas, y * shrinkageFactor);
-			this._context.drawImage(this._sliceCanvas, offset - displaceStrength, drawAtY);
 		}
 	},
 	
@@ -48,21 +38,12 @@ UndulatingLogo.prototype = {
 		return this._canvas;	
 	},
 	
-	getRedCanvas: function() {
-		return this._redCanvas;
+	getWidth: function() {
+		return this.getCanvas().width;
 	},
 	
-	
-	getGreenCanvas: function() {
-		return this._greenCanvas;
-	},
-	
-	getBlueCanvas: function() {
-		return this._blueCanvas;
-	},
-	
-	getSliceCanvas: function() {
-		return this._sliceCanvas;
+	getHeight: function() {
+		return this.getCanvas().height;
 	},
 	
 	_createOffsetCanvas: function (text, w, h, fillStyle) {

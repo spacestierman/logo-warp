@@ -24,29 +24,14 @@
     </style>
   </head>
   <body id="body">
-    <script id="vertexShader" type="x-shader/x-vertex">
-      attribute vec2 a_position;
-      
-      void main() {
-        gl_Position = vec4(a_position, 0, 1);
-      }
-    </script>
-    
-    <script id="fragmentShader" type="x-shader/x-fragment">
-      precision mediump float;
-      
-      uniform sampler2D u_image;
-      varying vec2 v_texCoord;
-      
-      void main() {
-        gl_FragColor = texture2D(u_image, v_texCoord);
-      }
-    </script>
-  
     <div id="fpsContainer"></div>
+    <img id="logo" src="../assets/images/logo.png" />
+    
     <script src="../assets/scripts/jquery-1.11.3.min.js"></script>
     <script src="../assets/scripts/threejs/three.min.js"></script>
     <script src="../assets/scripts/threejs/shaders/RGBShiftShader.js"></script>
+    <script src="../assets/scripts/threejs/shaders/BleachBypassShader.js"></script>
+    <script src="../assets/scripts/threejs/shaders/BadTVShader.js"></script>
     <script src="../assets/scripts/threejs/shaders/CopyShader.js"></script>
     <script src="../assets/scripts/threejs/postprocessing/AdaptiveToneMappingPass.js"></script>
     <script src="../assets/scripts/threejs/postprocessing/BloomPass.js"></script>
@@ -56,11 +41,12 @@
     <script src="../assets/scripts/threejs/postprocessing/GlitchPass.js"></script>
     <script src="../assets/scripts/threejs/postprocessing/MaskPass.js"></script>
     <script src="../assets/scripts/threejs/postprocessing/SavePass.js"></script>
-    <script src="../assets/scripts/threejs/postprocessing/TexturePass.js"></script>
     <script src="../assets/scripts/threejs/postprocessing/RenderPass.js"></script>
     <script src="../assets/scripts/threejs/postprocessing/ShaderPass.js"></script>
+    <script src="../assets/scripts/threejs/postprocessing/TexturePass.js"></script>
     <script src="../assets/scripts/threejs/postprocessing/EffectComposer.js"></script>
     
+    <script src="../assets/scripts/dat.gui.min.js"></script>
     <script src="../assets/scripts/fpsmeter.min.js"></script>
     <script>
       $( document ).ready(function() {
@@ -76,6 +62,8 @@
       });
     </script>
     
+    <script src="../assets/scripts/classes/UndulatingLogo.js"></script>
+    <script src="../assets/scripts/classes/Scroller.js"></script>
     <script src="index.js"></script>
     
   </body>
