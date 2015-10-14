@@ -48,17 +48,6 @@ var Scroller = function(width, height, canvas, logo) {
 	this._startedAt = new Date().getTime();
 	this._lastRenderTicks = new Date().getTime();
 	this._t = 0;
-	
-	// $(this._compositeCanvas).on('mousemove', function(event) {
-	//   this._mousePosition.x = event.pageX;
-	//   this._mousePosition.y = event.pageY;
-	// }.bind(this));
-	// $(this._compositeCanvas).on('mousedown', function(event) {
-	//   this._mouseIsDown = true;
-	// }.bind(this));
-	// $(this._compositeCanvas).on('mouseup', function(event) {
-	//   this._mouseIsDown = false;
-	// }.bind(this));
 };
 
 Scroller.prototype = {

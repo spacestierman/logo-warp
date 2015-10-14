@@ -73,7 +73,6 @@ $( document ).ready(function() {
 	var _lastRenderTicks = _startedAt;
 	
 	document.body.appendChild(_scrollerCanvas);
-	document.body.appendChild(_undulatingCanvas);
 	
 	setupDatGUI();
 	render();
@@ -122,8 +121,8 @@ $( document ).ready(function() {
 		scrollerGui.add(_scroller.params, "scanAngle", 0.01, Math.PI * 2).step(0.001).listen().name("Scan Angle");
 		scrollerGui.add(_scroller.params, "scanHeight", 1, 100).listen().name("Scan Height");
 		scrollerGui.add(_scroller.params, "brushAngle", 0.01, Math.PI * 2).step(0.001).listen().name("Brush Angle");
-		scrollerGui.add(_scroller.params, "brushX", 0.0, window.innerWidth).listen().name("Brush X");
-		scrollerGui.add(_scroller.params, "brushY", 0.0, window.innerHeight).listen().name("Brush Y");
+		scrollerGui.add(_scroller.params, "brushX", -window.innerWidth, window.innerWidth).listen().name("Brush X");
+		scrollerGui.add(_scroller.params, "brushY", -window.innerHeight, window.innerHeight).listen().name("Brush Y");
 		scrollerGui.add(_scroller.params, "brushScaleX", 0.0, 11.0).listen().name("Brush Scale X");
 		scrollerGui.add(_scroller.params, "brushScaleY", 0.0, 11.0).listen().name("Brush Scale Y");
 		scrollerGui.open();
