@@ -20,6 +20,10 @@ $( document ).ready(function() {
 	_renderer.domElement.id = "renderer";
 	
 	var _scroller = new Scroller(window.innerWidth, window.innerHeight, _renderer.domElement, _undulatingCanvas);
+	_scroller.params.showLogo = false;
+	_scroller.params.brushScaleX = 3.9;
+	_scroller.params.brushScaleY = 11.0;
+	_scroller.params.wipeAlpha = 0.11;
 	var _scrollerCanvas = _scroller.getCanvas();
 	
 	var _spriteTexture = new THREE.Texture(_undulatingCanvas);
@@ -47,7 +51,7 @@ $( document ).ready(function() {
 		show: true,
 		tDiffuse: null,
 		time: 0.0,
-		distortion: 0.0,
+		distortion: 0,
 		distortion2: 5.0,
 		speed: 0.2,
 		rollSpeed: 0.0
@@ -55,7 +59,7 @@ $( document ).ready(function() {
 	
 	var _shaders = [
 		_renderPass,
-		_tvShader,
+		//_tvShader,
 		_bleachPass,
 		_rgbEffect
 	];
@@ -100,27 +104,27 @@ $( document ).ready(function() {
 	function setupDatGUI() {
 		var gui = new dat.GUI();
 		
-		var tvGui = gui.addFolder('Bad TV');
+		/*var tvGui = gui.addFolder('Bad TV');
 		tvGui.add(_tvShaderParams, 'show').onChange(onShaderToggled);
-		tvGui.add(_tvShaderParams, 'distortion', 0.1, 20).step(0.1).listen().name("Thick Distort");
+		tvGui.add(_tvShaderParams, 'distortion', 0.1, 20).name("Thick Distort");
 		tvGui.add(_tvShaderParams, 'distortion2', 0.1, 20).step(0.1).listen().name("Fine Distort");
-		tvGui.add(_tvShaderParams, 'speed', 0.0,1.0).step(0.01).listen().name("Distort Speed");
-		tvGui.add(_tvShaderParams, 'rollSpeed', 0.0,1.0).step(0.01).listen().name("Roll Speed");
-		tvGui.open();
+		tvGui.add(_tvShaderParams, 'speed', 0.0, 1.0).listen().name("Distort Speed");
+		tvGui.add(_tvShaderParams, 'rollSpeed', 0.0,1.0).listen().name("Roll Speed");
+		tvGui.open();*/
 		
 		var rgbGui = gui.addFolder('RGB Split');
-		rgbGui.add(_rgbEffectParams, 'amount', 0.0, 1.0).step(0.001).listen().name("Amount");
-		rgbGui.add(_rgbEffectParams, 'angle', 0.0, Math.PI * 2).step(0.01).listen().name("Angle");
+		rgbGui.add(_rgbEffectParams, 'amount', 0.0, 0.02).listen().name("Amount");
+		rgbGui.add(_rgbEffectParams, 'angle', 0.0, Math.PI * 2).listen().name("Angle");
 		rgbGui.open();
 		
 		var scrollerGui = gui.addFolder('Scroller');
 		scrollerGui.add(_scroller.params, 'debug')
 		scrollerGui.add(_scroller.params, "showLogo");
 		scrollerGui.add(_scroller.params, "scrollSpeed", 0.01, 20).listen().name("Scroll Speed");
-		scrollerGui.add(_scroller.params, "wipeAlpha", 0.01, 1.0).step(0.01).listen().name("Wipe Alpha");
-		scrollerGui.add(_scroller.params, "scanAngle", 0.01, Math.PI * 2).step(0.001).listen().name("Scan Angle");
+		scrollerGui.add(_scroller.params, "wipeAlpha", 0.01, 1.0).listen().name("Wipe Alpha");
+		scrollerGui.add(_scroller.params, "scanAngle", 0.01, Math.PI * 2).listen().name("Scan Angle");
 		scrollerGui.add(_scroller.params, "scanHeight", 1, 100).listen().name("Scan Height");
-		scrollerGui.add(_scroller.params, "brushAngle", 0.01, Math.PI * 2).step(0.001).listen().name("Brush Angle");
+		scrollerGui.add(_scroller.params, "brushAngle", 0.01, Math.PI * 2).listen().name("Brush Angle");
 		scrollerGui.add(_scroller.params, "brushX", -window.innerWidth, window.innerWidth).listen().name("Brush X");
 		scrollerGui.add(_scroller.params, "brushY", -window.innerHeight, window.innerHeight).listen().name("Brush Y");
 		scrollerGui.add(_scroller.params, "brushScaleX", 0.0, 11.0).listen().name("Brush Scale X");
