@@ -1,5 +1,5 @@
-var ShaderPassParameters = function(shader, defaultShow) {
-	this._shader = shader;
+var ShaderPassParameters = function(shaderPass, defaultShow) {
+	this._shader = shaderPass;
 	this._params = this._buildParams(defaultShow);	
 };
 

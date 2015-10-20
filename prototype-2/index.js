@@ -33,35 +33,11 @@ $( document ).ready(function() {
 	_scene.add(_sprite);
 	
 	var _renderPass = new THREE.RenderPass(_scene, _camera)
-	
-	var bleachPass = new THREE.ShaderPass( THREE.BleachBypassShader );
-	var _bleachShader = new ShaderPassParameters(bleachPass, false);
-
+	var _bleachShader = new ShaderPassParameters(new THREE.ShaderPass(THREE.BleachBypassShader), false);
 	var _rgbShader = new ShaderPassParameters(new THREE.ShaderPass(THREE.RGBShiftShader), true);
-	
 	var _staticShader = new ShaderPassParameters(new THREE.ShaderPass(THREE.StaticShader), true);
-	
-	var _filmShader = new THREE.ShaderPass(THREE.FilmShader);
-	var _filmShaderParams = {
-		show: false,
-		tDiffuse: _filmShader.uniforms["tDiffuse"].value,
-		time: _filmShader.uniforms["time"].value,
-		nIntensity: _filmShader.uniforms["nIntensity"].value,
-		sIntensity: _filmShader.uniforms["sIntensity"].value,
-		sCount: _filmShader.uniforms["sCount"].value,
-		grayscale: true
-	};
-	
-	var _tvShader = new THREE.ShaderPass(THREE.BadTVShader);
-	var _tvShaderParams = {
-		show: false,
-		tDiffuse: _tvShader.uniforms["tDiffuse"].value,
-		time: _tvShader.uniforms["time"].value,
-		distortion: _tvShader.uniforms["distortion"].value,
-		distortion2: _tvShader.uniforms["distortion2"].value,
-		speed: _tvShader.uniforms["speed"].value,
-		rollSpeed: 0.0
-	};
+	var _filmShader = new ShaderPassParameters(new THREE.ShaderPass(THREE.FilmShader), true);
+	var _tvShader = new ShaderPassParameters(new THREE.ShaderPass(THREE.BadTVShader), true);
 		
 	var _startedAt = new Date().getTime();
 	var _lastRenderTicks = _startedAt;
@@ -119,43 +95,43 @@ $( document ).ready(function() {
 		scrollerGui.add(_scroller.params, "brushScaleY", 0.0, 11.0).name("Brush Scale Y");
 		scrollerGui.open();
 		
-	}
-	
-	function buildMiniGUI() {
-		var miniGUI = new dat.GUI();
-		
-		var rgbGui = miniGUI.addFolder('RGB Split');
-		rgbGui.add(_rgbShader.getParameters(), 'show').onChange(setupNewComposer);
-		rgbGui.add(_rgbShader.getParameters(), 'amount', 0.0, 0.02).name("Amount");
-		rgbGui.add(_rgbShader.getParameters(), 'angle', 0.0, Math.PI * 2).name("Angle");
-		rgbGui.open();
-		
-		var bleachGUI = miniGUI.addFolder('Bleach');
-		bleachGUI.add(_bleachShader.getParameters(), 'show').onChange(setupNewComposer);
-		bleachGUI.add(_bleachShader.getParameters(), 'opacity', 1.0, 10.0).name("Opacity");
-		bleachGUI.open();
-		
-		var staticGUI = miniGUI.addFolder('Static');
+		var staticGUI = gui.addFolder('Static');
 		staticGUI.add(_staticShader.getParameters(), 'show').onChange(setupNewComposer);
 		staticGUI.add(_staticShader.getParameters(), 'amount', 0.0, 5.0).name("Amount");
 		staticGUI.add(_staticShader.getParameters(), 'size', 0.0, 20.0).name("Size");
 		staticGUI.open();
 		
-		var tvGui = miniGUI.addFolder('Bad TV');
-		tvGui.add(_tvShaderParams, 'show').onChange(setupNewComposer);
-		tvGui.add(_tvShaderParams, 'distortion', 0.1, 20).name("Thick Distort");
-		tvGui.add(_tvShaderParams, 'distortion2', 0.1, 20).step(0.1).name("Fine Distort");
-		tvGui.add(_tvShaderParams, 'speed', 0.0, 1.0).name("Distort Speed");
-		tvGui.add(_tvShaderParams, 'rollSpeed', 0.0,1.0).name("Roll Speed");
-		tvGui.open();
-		
-		var filmGUI = miniGUI.addFolder('Film Shader');
-		filmGUI.add(_filmShaderParams, 'show').onChange(setupNewComposer);
-		filmGUI.add(_filmShaderParams, 'nIntensity', 0.0, 2.0).name("N Intensity");
-		filmGUI.add(_filmShaderParams, 'sIntensity', 0.0, 2.0).step(0.1).name("S Intensity");
-		filmGUI.add(_filmShaderParams, 'sCount', 0, 4096).name("Line Count");
-		filmGUI.add(_filmShaderParams, 'grayscale').name("Is Greyscale?");
+		var filmGUI = gui.addFolder('Film Shader');
+		filmGUI.add(_filmShader.getParameters(), 'show').onChange(setupNewComposer);
+		filmGUI.add(_filmShader.getParameters(), 'nIntensity', 0.0, 2.0).name("N Intensity");
+		filmGUI.add(_filmShader.getParameters(), 'sIntensity', 0.0, 2.0).step(0.1).name("S Intensity");
+		filmGUI.add(_filmShader.getParameters(), 'sCount', 0, 4096).name("Line Count");
+		filmGUI.add(_filmShader.getParameters(), 'grayscale').name("Is Greyscale?");
 		filmGUI.open();
+		
+	}
+	
+	function buildMiniGUI() {
+		var gui = new dat.GUI();
+		
+		var rgbGui = gui.addFolder('RGB Split');
+		rgbGui.add(_rgbShader.getParameters(), 'show').onChange(setupNewComposer);
+		rgbGui.add(_rgbShader.getParameters(), 'amount', 0.0, 0.02).name("Amount");
+		rgbGui.add(_rgbShader.getParameters(), 'angle', 0.0, Math.PI * 2).name("Angle");
+		rgbGui.open();
+		
+		var bleachGUI = gui.addFolder('Bleach');
+		bleachGUI.add(_bleachShader.getParameters(), 'show').onChange(setupNewComposer);
+		bleachGUI.add(_bleachShader.getParameters(), 'opacity', 1.0, 10.0).name("Opacity");
+		bleachGUI.open();
+		
+		var tvGui = gui.addFolder('Bad TV');
+		tvGui.add(_tvShader.getParameters(), 'show').onChange(setupNewComposer);
+		tvGui.add(_tvShader.getParameters(), 'distortion', 0.1, 20).name("Thick Distort");
+		tvGui.add(_tvShader.getParameters(), 'distortion2', 0.1, 20).step(0.1).name("Fine Distort");
+		tvGui.add(_tvShader.getParameters(), 'speed', 0.0, 1.0).name("Distort Speed");
+		tvGui.add(_tvShader.getParameters(), 'rollSpeed', 0.0,1.0).name("Roll Speed");
+		tvGui.open();
 	}
 	
 	function updateShadersFromGUI(totalElapsedMilliseconds, deltaMilliseconds) {
@@ -163,23 +139,16 @@ $( document ).ready(function() {
 			time:  totalElapsedMilliseconds / 10000
 		});
 		
-		// _bleachPass.uniforms["opacity"].value = 3.0; //_bleachParams.opacity;
 		_bleachShader.updateShaderToParameters();
-		
 		_rgbShader.updateShaderToParameters();
 		
-		_tvShader.uniforms["time"].value = totalElapsedMilliseconds / 10000;
-		_tvShader.uniforms["distortion"].value = _tvShaderParams.distortion;
-		_tvShader.uniforms["distortion2"].value = _tvShaderParams.distortion2;
-		_tvShader.uniforms["speed"].value = _tvShaderParams.speed;
-		_tvShader.uniforms["rollSpeed"].value = _tvShaderParams.rollSpeed;
+		_tvShader.updateShaderToParameters({
+			time: totalElapsedMilliseconds / 10000
+		})
 		
-		_filmShader.uniforms["time"].value = totalElapsedMilliseconds / 10000;
-		_filmShader.uniforms["tDiffuse"].value = _filmShaderParams.tDiffuse;
-		_filmShader.uniforms["nIntensity"].value = _filmShaderParams.nIntensity;
-		_filmShader.uniforms["sIntensity"].value = _filmShaderParams.sIntensity;
-		_filmShader.uniforms["sCount"].value = _filmShaderParams.sCount;
-		_filmShader.uniforms["grayscale"].value = _filmShaderParams.grayscale;
+		_filmShader.updateShaderToParameters({
+			time: totalElapsedMilliseconds / 10000
+		});
 	}
 	
 	function setupNewComposer()  {
@@ -198,22 +167,14 @@ $( document ).ready(function() {
 			shaders.push(_bleachShader.getShader());
 		}
 		
+		if (_tvShader.getParameters().show) 
+		{
+			shaders.push(_tvShader.getShader());	
+		}
+		
 		_scrollerWithEffects.maybeAddPass(_staticShader.getShader(), _staticShader.getParameters().show);
-		/*if (_staticParams.show) 
-		{
-			shaders.push(_staticShader);	
-		}*/
-		
-		if (_tvShaderParams.show) 
-		{
-			shaders.push(_tvShader);	
-		}
-		
-		if (_filmShaderParams.show)
-		{
-			shaders.push(_filmShader);
-		}
-		
+		_scrollerWithEffects.maybeAddPass(_filmShader.getShader(), _filmShader.getParameters().show);
+				
 		_composer = new THREE.EffectComposer(_renderer);
 		for(var i=0; i<shaders.length; i++) {
 			var shader = shaders[i];
