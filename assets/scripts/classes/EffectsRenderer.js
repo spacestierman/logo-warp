@@ -22,6 +22,8 @@ var EffectsRenderer = function(canvas) {
 	this._renderer.setSize(this._canvas.width, this._canvas.height);
 	
 	this._spriteTexture = new THREE.Texture(this._canvas);
+	this._spriteTexture.minFilter = THREE.LinearFilter;
+	
 	this._spriteMaterial = new THREE.SpriteMaterial({ map: this._spriteTexture });
 	this._sprite = new THREE.Sprite(this._spriteMaterial);
 	this._sprite.position.set(0, 0, 0);
@@ -55,6 +57,10 @@ EffectsRenderer.prototype = {
 	},
 	
 	addPass: function(shaderPass) {
+		if (this.containsPass(shaderPass)) {
+			this.removePass(shaderPass);
+		}
+		
 		this._shaders.push(shaderPass);
 		this._setupNewComposer();
 	},

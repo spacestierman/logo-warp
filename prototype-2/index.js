@@ -1,6 +1,10 @@
 /* global totalElapsedMilliseconds */
 $( document ).ready(function() {
 	var _logo = document.getElementById("logo");
+	if (_logo == null)
+	{
+		throw "no logo";
+	}
 	var _undulating = new UndulatingLogo(_logo, 400, 150, "undulating");
 	var _undulatingCanvas = _undulating.getCanvas(); 
 	
@@ -26,25 +30,28 @@ $( document ).ready(function() {
 	var _scrollerWithEffects = new EffectsRenderer(_scrollerCanvas);
 	
 	var _spriteTexture = new THREE.Texture(_undulatingCanvas);
+	_spriteTexture.minFilter = THREE.LinearFilter;
 	var _spriteMaterial = new THREE.SpriteMaterial({ map: _spriteTexture });
+	
 	var _sprite = new THREE.Sprite(_spriteMaterial);
 	_sprite.position.set(0, 0, 0);
 	_sprite.scale.set(_undulatingCanvas.width, _undulatingCanvas.height, 1.0);
 	_scene.add(_sprite);
 	
 	var _renderPass = new THREE.RenderPass(_scene, _camera)
-	var _bleachShader = new ShaderPassParameters(new THREE.ShaderPass(THREE.BleachBypassShader), false);
+	var _bleachShader = new ShaderPassParameters(new THREE.ShaderPass(THREE.BleachBypassShader), true);
 	var _rgbShader = new ShaderPassParameters(new THREE.ShaderPass(THREE.RGBShiftShader), true);
 	var _staticShader = new ShaderPassParameters(new THREE.ShaderPass(THREE.StaticShader), true);
 	var _filmShader = new ShaderPassParameters(new THREE.ShaderPass(THREE.FilmShader), true);
 	var _tvShader = new ShaderPassParameters(new THREE.ShaderPass(THREE.BadTVShader), true);
-		
+	
 	var _startedAt = new Date().getTime();
 	var _lastRenderTicks = _startedAt;
 	var _t = 0;
 	
 	document.body.appendChild(_scrollerWithEffects.getOutputCanvas());
 	document.body.appendChild(_scrollerCanvas);
+	document.body.appendChild(_undulatingCanvas);
 	
 	setupNewComposer();
 	setupDatGUI();
@@ -108,7 +115,6 @@ $( document ).ready(function() {
 		filmGUI.add(_filmShader.getParameters(), 'sCount', 0, 4096).name("Line Count");
 		filmGUI.add(_filmShader.getParameters(), 'grayscale').name("Is Greyscale?");
 		filmGUI.open();
-		
 	}
 	
 	function buildMiniGUI() {
@@ -156,25 +162,17 @@ $( document ).ready(function() {
 			_renderPass,
 		];
 		
-		/*_scrollerWithEffects.maybeAddPass(_rgbEffect, _rgbEffectParams.show);*/
-		if (_rgbShader.getParameters().show)
-		{
-			shaders.push(_rgbShader.getShader());
-		}
+		_scrollerWithEffects.maybeAddPass(_rgbShader.getShader(), _rgbShader.getParameters().show);
 		
 		if (_bleachShader.getParameters().show)
 		{
 			shaders.push(_bleachShader.getShader());
 		}
 		
-		if (_tvShader.getParameters().show) 
-		{
-			shaders.push(_tvShader.getShader());	
-		}
-		
+		_scrollerWithEffects.maybeAddPass(_tvShader.getShader(), _tvShader.getParameters().show);
 		_scrollerWithEffects.maybeAddPass(_staticShader.getShader(), _staticShader.getParameters().show);
 		_scrollerWithEffects.maybeAddPass(_filmShader.getShader(), _filmShader.getParameters().show);
-				
+		
 		_composer = new THREE.EffectComposer(_renderer);
 		for(var i=0; i<shaders.length; i++) {
 			var shader = shaders[i];

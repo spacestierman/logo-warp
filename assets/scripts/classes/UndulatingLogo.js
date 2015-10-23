@@ -8,7 +8,7 @@ var UndulatingLogo = function(image, width, height, id) {
 	this._canvas.id = id;
 	
 	this._context = this._canvas.getContext('2d');
-	this._context.globalCompositeOperation = 'multiply';
+	//this._context.globalCompositeOperation = 'multiply'; // Setting the globalCompositeOperation to multiply causes browsers to render completely blank white canvases.
 	
 	this._sliceCanvas = document.createElement('canvas');
 	this._sliceCanvas.width = width;
