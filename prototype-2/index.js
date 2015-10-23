@@ -21,7 +21,10 @@ $( document ).ready(function() {
 	_renderer.setSize(_undulatingCanvas.width, _undulatingCanvas.height);
 	_renderer.domElement.id = "renderer";
 	
-	var _scroller = new Scroller(window.innerWidth, window.innerHeight, _renderer.domElement, _undulatingCanvas);
+	var _fuzz = document.getElementById("fuzz");
+	var _background = new Background(window.innerWidth, window.innerHeight, _fuzz, ["The truth is out there", "I'm all out of bubblegum"]);
+	
+	var _scroller = new Scroller(window.innerWidth, window.innerHeight, _renderer.domElement, _background.getDomElement(), _undulatingCanvas);
 	_scroller.params.showLogo = false;
 	_scroller.params.brushScaleX = 3.9;
 	_scroller.params.brushScaleY = 11.0;
@@ -49,9 +52,11 @@ $( document ).ready(function() {
 	var _lastRenderTicks = _startedAt;
 	var _t = 0;
 	
+	//document.body.appendChild(_background.getDomElement());
 	document.body.appendChild(_scrollerWithEffects.getOutputCanvas());
-	document.body.appendChild(_scrollerCanvas);
-	document.body.appendChild(_undulatingCanvas);
+	//document.body.appendChild(_scrollerCanvas);
+	//document.body.appendChild(_undulatingCanvas);
+	
 	
 	setupNewComposer();
 	setupDatGUI();
@@ -65,6 +70,7 @@ $( document ).ready(function() {
 		
 		updateShadersFromGUI(totalElapsedMilliseconds, deltaMilliseconds);
 		
+		_background.render(totalElapsedMilliseconds);
 		_undulating.render(totalElapsedMilliseconds);
 		_scroller.render();
 		

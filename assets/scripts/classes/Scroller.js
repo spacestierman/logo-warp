@@ -1,4 +1,4 @@
-var Scroller = function(width, height, canvas, logo) {
+var Scroller = function(width, height, canvas, background, logo) {
 	this.DEFAULT_WIPE_ALPHA = 0.25;
 	
 	this.params = {
@@ -14,6 +14,8 @@ var Scroller = function(width, height, canvas, logo) {
 		brushScaleX: 1.0,
 		brushScaleY: 1.0
 	};
+	
+	this._backgroundSource = background;
 	
 	this._backgroundCanvas = document.createElement('canvas');
 	this._backgroundCanvas.width = width;
@@ -71,6 +73,8 @@ Scroller.prototype = {
 		this._foregroundContext.restore();
 		 
 		this._temporaryContext.clearRect(0, 0, this._temporaryCanvas.width, this._temporaryCanvas.height);
+		this._temporaryContext.globalCompositeOperation = "destination-over";
+		this._temporaryContext.drawImage(this._backgroundSource, 0, 0);
 		this._temporaryContext.drawImage(this._backgroundCanvas, 0, -this.params.scrollSpeed); // Shift the background around
 		  
 		this._backgroundContext.clearRect(0, 0, this._backgroundCanvas.width, this._backgroundCanvas.height);
