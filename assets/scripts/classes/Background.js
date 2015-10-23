@@ -1,3 +1,11 @@
+/*
+	Other possibilities:
+	http://pixelshaders.com/editor/
+	http://www.airtightinteractive.com/demos/js/shaders/mirror/
+	http://www.routter.co.tt/
+
+*/
+
 var Background = function(width, height, tile, messages) {
 	this.parameters = {
 		fontSizeInPixels: 20,
