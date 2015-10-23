@@ -45,7 +45,9 @@ $( document ).ready(function() {
 	var _bleachShader = new ShaderPassParameters(new THREE.ShaderPass(THREE.BleachBypassShader), true);
 	var _rgbShader = new ShaderPassParameters(new THREE.ShaderPass(THREE.RGBShiftShader), true);
 	var _staticShader = new ShaderPassParameters(new THREE.ShaderPass(THREE.StaticShader), true);
-	var _filmShader = new ShaderPassParameters(new THREE.ShaderPass(THREE.FilmShader), true);
+	_staticShader.getParameters().amount = 0.11;
+	
+	var _filmShader = new ShaderPassParameters(new THREE.ShaderPass(THREE.FilmShader), false);
 	var _tvShader = new ShaderPassParameters(new THREE.ShaderPass(THREE.BadTVShader), true);
 	
 	var _startedAt = new Date().getTime();
