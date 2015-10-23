@@ -9,14 +9,14 @@
 var Background = function(width, height, tile, messages) {
 	this.parameters = {
 		fontSizeInPixels: 20,
-		stepHeightInPixels: 30
+		stepHeightInPixels: 30,
+		fontAlpha: 0.1
 	};
 	
 	this._canvas = document.createElement("canvas");
 	this._canvas.width = width;
 	this._canvas.height = height;
 	this._context = this._canvas.getContext("2d");
-	this._context.globalCompositeOperation = "multiply";
 	
 	this._tile = tile;
 	this._messages = messages;
@@ -24,15 +24,59 @@ var Background = function(width, height, tile, messages) {
 
 Background.prototype = {
 	render: function(totalElapsedMilliseconds) {
-		this._context.globalCompositeOperation = "screen";
-		this._context.fillStyle = "rgba(255, 255, 255, 1)";
-		this._context.clearRect(0, 0, this._canvas.width, this._canvas.height);
-		
 		//this._renderBackgroundTile(totalElapsedMilliseconds);
 		
 		//this._context.fillRect(0, 0, this._canvas.width, this._canvas.height / 2);
 		
-		this._context.font = this.parameters.fontSizeInPixels + " serif";
+		this._renderLargeBackgroundWords(totalElapsedMilliseconds);
+		//this._renderBackgroundWords(totalElapsedMilliseconds);
+	},
+	
+	getParameters: function() {
+		return this.parameters;
+	},
+	
+	getDomElement: function() {
+		return this._canvas;
+	},
+	
+	_renderLargeBackgroundWords: function(totalElapsedMilliseconds) {
+		this._context.globalCompositeOperation = "source-over";
+		this._context.clearRect(0, 0, this._canvas.width, this._canvas.height);
+		this._context.fillStyle = "rgba(255, 255, 255, 1.0)";
+		this._context.fillRect(0, 0, this._canvas.width, this._canvas.height);
+		
+		var current = { 
+			x: 0,
+			y: 0	
+		};
+		var currentMessageIndex = 0;
+		while(current.y <= this._canvas.height)
+		{
+			var message = this._messages[currentMessageIndex];
+			
+			current.x = 0;
+			y: 100 + totalElapsedMilliseconds / 1000;
+			
+			this._context.font = (this.parameters.fontSizeInPixels * 5) + "px sans-serif";
+			this._context.fillStyle = this._getRandomColor(this.parameters.fontAlpha);
+			this._context.fillText(message, current.x, current.y);
+			
+			current.y += this.parameters.stepHeightInPixels;
+			currentMessageIndex++;
+			if (currentMessageIndex >= this._messages.length) {
+				currentMessageIndex = 0;
+			}
+		}
+		
+	},
+	
+	_renderBackgroundWords: function(totalElapsedMilliseconds) {
+		this._context.globalCompositeOperation = "screen";
+		this._context.fillStyle = "rgba(255, 255, 255, 1)";
+		this._context.clearRect(0, 0, this._canvas.width, this._canvas.height);
+		
+		this._context.font = this.parameters.fontSizeInPixels + "px serif";
 		this._context.fillStyle = "rgba(0, 0, 0, 100)";
 		
 		var messageIndex = 0;
@@ -52,7 +96,7 @@ Background.prototype = {
 				var message = this._messages[messageIndex];
 				var metrics = this._context.measureText(message);
 				
-				this._context.fillStyle = this._getRandomColor(128);
+				this._context.fillStyle = this._getRandomColor(0.5);
 				this._context.fillText(message, current.x, current.y);
 				
 				current.x += metrics.width;
@@ -65,10 +109,6 @@ Background.prototype = {
 			
 			current.y += this.parameters.stepHeightInPixels;
 		}	
-	},
-	
-	getDomElement: function() {
-		return this._canvas;
 	},
 	
 	_renderBackgroundTile: function(totalElapsedMilliseconds) {

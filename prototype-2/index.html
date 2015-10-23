@@ -8,6 +8,7 @@
     }
     body {
       background: #000000;
+      /*overflow: hidden;*/
     }
     
     canvas { 
@@ -38,7 +39,7 @@
   <body id="body">
     <div id="fpsContainer"></div>
     
-    <img id="logo-large" src="../assets/images/logo-large.png" />
+    <img id="logo-large" src="../assets/images/logo-large-unwarped.png" />
     <img id="logo" src="../assets/images/logo.png" />
     <img id="fuzz" src="../assets/images/fuzz.png" />
     
@@ -79,12 +80,13 @@
       });
     </script>
     
-    <script src="../assets/scripts/webgl-debug.js"></script>
     <script src="../assets/scripts/classes/UndulatingLogo.js"></script>
     <script src="../assets/scripts/classes/Scroller.js"></script>
     <script src="../assets/scripts/classes/EffectsRenderer.js"></script>
     <script src="../assets/scripts/classes/ShaderPassParameters.js"></script>
     <script src="../assets/scripts/classes/Background.js"></script>
+    <script src="../assets/scripts/classes/Logo.js"></script>
+    <script src="../assets/scripts/classes/ScrollerManager.js"></script>
     <script src="index.js"></script>
     
   </body>
