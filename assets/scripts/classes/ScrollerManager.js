@@ -1,32 +1,45 @@
-var ScrollerManager = function(background, undulatingCanvas) {
-	this._undulatingCanvas = undulatingCanvas;
+var ScrollerManager = function(background, undulatingCanvas, logo) {
 	this._background = background;
+	this._logo = logo;
 	
-	this._renderer = new THREE.WebGLRenderer({ alpha:true, preserveDrawingBuffer: true });
-	this._renderer.setClearColor(0xffffff, 1.0);
-	
-	this._renderer.setSize(this._undulatingCanvas.width, this._undulatingCanvas.height);
-	
-	this._scroller = new Scroller(window.innerWidth, window.innerHeight, this._undulatingCanvas, this._background);
+	this._scroller = new Scroller(window.innerWidth, window.innerHeight, undulatingCanvas, null, logo);
 	this._scroller.params.showLogo = false;
+	this._scroller.params.scrollSpeed = 5;
+	this._scroller.params.scanHeight = 100;
+	this._scroller.params.brushY = 58;
 	this._scroller.params.brushScaleX = 3.9;
 	this._scroller.params.brushScaleY = 11.0;
-	this._scroller.params.wipeAlpha = 0.11;
+	this._scroller.params.wipeAlpha = 0.01;
+	
 	this._scrollerWithEffects = new EffectsRenderer(this._scroller.getCanvas());
 	
 	this._rgbShader = new ShaderPassParameters(new THREE.ShaderPass(THREE.RGBShiftShader), true);
+	this._rgbShader.getParameters().angle = 6.0;
+	
 	this._staticShader = new ShaderPassParameters(new THREE.ShaderPass(THREE.StaticShader), true);
+	this._staticShader.getParameters().show = false;
 	this._staticShader.getParameters().amount = 0.11;
 	this._filmShader = new ShaderPassParameters(new THREE.ShaderPass(THREE.FilmShader), false);
 	this._tvShader = new ShaderPassParameters(new THREE.ShaderPass(THREE.BadTVShader), true);
 	this._tvShader.getParameters().distortion = 11.1;
+	this._tvShader.getParameters().distortion2 = 0.0;
+	this._tvShader.getParameters().rollSpeed = 0.0;
+
+	this._composite = document.createElement('canvas');
+	this._composite.width = window.innerWidth;
+	this._composite.height = window.innerHeight;
+	this._compositeContext = this._composite.getContext('2d');
 	
 	this._setupNewComposer();
 };
 
 ScrollerManager.prototype = {
 	getDomElement: function() {
-		return this._scrollerWithEffects.getOutputCanvas();
+		return this._composite;
+	},
+	
+	getScrollerCanvas: function() {
+		return this._scroller.getCanvas();
 	},
 	
 	render: function(totalElapsedMilliseconds, deltaMilliseconds) {
@@ -34,6 +47,22 @@ ScrollerManager.prototype = {
 		
 		this._scroller.render();
 		this._scrollerWithEffects.render(totalElapsedMilliseconds);
+		
+		this._compositeContext.save();
+		this._compositeContext.globalCompositeOperation = "multiply";
+		
+		this._compositeContext.clearRect(0, 0, this._composite.width, this._composite.height);
+		this._compositeContext.drawImage(this._background, 0, 0);
+		this._compositeContext.drawImage(this._scrollerWithEffects.getOutputCanvas(), 0, 0);
+		
+		var logoAt = {
+			x: Math.floor(this._composite.width / 2 - this._logo.width / 2),
+			y: Math.floor(this._composite.height / 2 - this._logo.height / 2),
+		};
+		
+		this._compositeContext.drawImage(this._logo, logoAt.x, logoAt.y);
+		
+		this._compositeContext.restore();
 	},
 	
 	showDatGUI: function() {

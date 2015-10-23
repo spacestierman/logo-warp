@@ -25,9 +25,6 @@ var Background = function(width, height, tile, messages) {
 Background.prototype = {
 	render: function(totalElapsedMilliseconds) {
 		//this._renderBackgroundTile(totalElapsedMilliseconds);
-		
-		//this._context.fillRect(0, 0, this._canvas.width, this._canvas.height / 2);
-		
 		this._renderLargeBackgroundWords(totalElapsedMilliseconds);
 		//this._renderBackgroundWords(totalElapsedMilliseconds);
 	},
@@ -53,20 +50,27 @@ Background.prototype = {
 		var currentMessageIndex = 0;
 		while(current.y <= this._canvas.height)
 		{
-			var message = this._messages[currentMessageIndex];
-			
 			current.x = 0;
-			y: 100 + totalElapsedMilliseconds / 1000;
 			
-			this._context.font = (this.parameters.fontSizeInPixels * 5) + "px sans-serif";
-			this._context.fillStyle = this._getRandomColor(this.parameters.fontAlpha);
-			this._context.fillText(message, current.x, current.y);
+			while(current.x <= this._canvas.width)
+			{
+				var message = this._messages[currentMessageIndex];
+				
+				y: 100 + totalElapsedMilliseconds / 1000;
+				
+				this._context.font = (this.parameters.fontSizeInPixels * 5) + "px sans-serif";
+				this._context.fillStyle = this._getRandomColor(this.parameters.fontAlpha);
+				this._context.fillText(message, current.x, current.y);
+				
+				var metrics = this._context.measureText(message);
+				current.x += metrics.width;
+				currentMessageIndex++;
+				if (currentMessageIndex >= this._messages.length) {
+					currentMessageIndex = 0;
+				}
+			}
 			
 			current.y += this.parameters.stepHeightInPixels;
-			currentMessageIndex++;
-			if (currentMessageIndex >= this._messages.length) {
-				currentMessageIndex = 0;
-			}
 		}
 		
 	},

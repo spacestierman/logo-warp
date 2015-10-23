@@ -8,27 +8,22 @@ $( document ).ready(function() {
 	var _undulating = new UndulatingLogo(_logo, 400, 150, "undulating");
 	var _undulatingCanvas = _undulating.getCanvas(); 
 
-	var _fuzz = document.getElementById("fuzz");
-	var _background = new Background(window.innerWidth, window.innerHeight, _fuzz, ["don't fear oblivion", "the bold are never obsolete", "the future is already yours", "creation is your lifeblood", "innovation pulses through your veins", "Metamorphosis is your second nature"]);
-	var _backgroundWithEffects = new EffectsRenderer(_background.getDomElement());
-	
-	var _logoMain = new Logo(document.getElementById("logo-large")) 
-	var _logoMainWithEffects = new EffectsRenderer(_logoMain.getDomElement());
-	_logoMainWithEffects.addPass(new THREE.ShaderPass(THREE.BadTVShader));
-	
-	var _scrollerManager = new ScrollerManager(_background.getDomElement(), _undulatingCanvas);
+	var _backgroundManager = new BackgroundManager();
+	var _logoManager = new LogoManager();
+	var _scrollerManager = new ScrollerManager(_backgroundManager.getDomElement(), _undulatingCanvas, _logoManager.getDomElement());
 	
 	var _startedAt = new Date().getTime();
 	var _lastRenderTicks = _startedAt;
 	var _t = 0;
 	
 	document.body.appendChild(_scrollerManager.getDomElement());
+	//document.body.appendChild(_scrollerManager.getScrollerCanvas());
 	//document.body.appendChild(_scrollerWithEffects.getOutputCanvas());
-	//document.body.appendChild(_background.getDomElement());
-	//document.body.appendChild(_backgroundWithEffects.getOutputCanvas());
+	//document.body.appendChild(_backgroundManager.getDomElement());
 	//document.body.appendChild(_scrollerCanvas);
 	//document.body.appendChild(_undulatingCanvas);
-	document.body.appendChild(_logoMainWithEffects.getOutputCanvas());
+	//document.body.appendChild(_logoManager.getDomElement());
+	//document.body.appendChild(_logoManager.getLogoCanvas());
 	
 	setupDatGUI();
 	render();
@@ -39,15 +34,11 @@ $( document ).ready(function() {
 		var deltaMilliseconds = nowTicks - _lastRenderTicks;
 		//console.log("totalElapsedMilliseconds: " + totalElapsedMilliseconds + "ms @" + _t + " dT:" + deltaMilliseconds + "ms");
 		
-		_background.render(totalElapsedMilliseconds);
 		_undulating.render(totalElapsedMilliseconds);
 		
-		_logoMain.render(totalElapsedMilliseconds);
-		_logoMainWithEffects.render(totalElapsedMilliseconds);
-		
+		_backgroundManager.render(totalElapsedMilliseconds, deltaMilliseconds);
+		_logoManager.render(totalElapsedMilliseconds, deltaMilliseconds);
 		_scrollerManager.render(totalElapsedMilliseconds, deltaMilliseconds);
-		
-		_backgroundWithEffects.render(totalElapsedMilliseconds);
 		
 		_lastRenderTicks = new Date().getTime();
 		_t += 0.1;
@@ -56,17 +47,8 @@ $( document ).ready(function() {
 	}
 	
 	function setupDatGUI() {
-		buildBackgroundGUI();
+		_backgroundManager.showDatGUI();
+		_logoManager.showDatGUI();
 		_scrollerManager.showDatGUI();
-	}
-	
-	function buildBackgroundGUI() {
-		var gui = new dat.GUI();
-		
-		var backgroundFolder = gui.addFolder("Background");
-		backgroundFolder.add(_background.getParameters(), "fontSizeInPixels", 1, 30).name("Font Size");
-		backgroundFolder.add(_background.getParameters(), "fontAlpha", 0.01, 1.0).name("Font Alpha");
-		backgroundFolder.add(_background.getParameters(), "stepHeightInPixels", 1, 100).name("Step Height");
-		//backgroundFolder.open();
 	}
 });

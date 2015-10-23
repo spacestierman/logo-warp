@@ -17,7 +17,7 @@ var EffectsRenderer = function(canvas) {
 	this._camera.lookAt(this._scene.position);
 	
 	this._renderer = new THREE.WebGLRenderer({ alpha: true, preserveDrawingBuffer: true });
-	this._renderer.setClearColor(0xffffff, 1.0);
+	this._renderer.setClearColor(0xffffff, 0.0);
 	
 	this._renderer.setSize(this._canvas.width, this._canvas.height);
 	

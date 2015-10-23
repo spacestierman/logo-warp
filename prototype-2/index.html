@@ -8,7 +8,7 @@
     }
     body {
       background: #000000;
-      /*overflow: hidden;*/
+      overflow: hidden;
     }
     
     canvas { 
@@ -28,18 +28,18 @@
     }
     
     img#logo-large {
-      display: block;
+      /*display: block;
       position: absolute;
       top: 50%;
       left: 50%;
-      transform: translate(-50%, -50%);
+      transform: translate(-50%, -50%);*/
     }
     </style>
   </head>
   <body id="body">
     <div id="fpsContainer"></div>
     
-    <img id="logo-large" src="../assets/images/logo-large-unwarped.png" />
+    <img id="logo-large" src="../assets/images/logo-large.png" />
     <img id="logo" src="../assets/images/logo.png" />
     <img id="fuzz" src="../assets/images/fuzz.png" />
     
@@ -51,6 +51,9 @@
     <script src="../assets/scripts/threejs/shaders/CopyShader.js"></script>
     <script src="../assets/scripts/threejs/shaders/FilmShader.js"></script>
     <script src="../assets/scripts/threejs/shaders/StaticShader.js"></script>
+    <script src="../assets/scripts/threejs/shaders/VignetteShader.js"></script>
+    <script src="../assets/scripts/threejs/shaders/MirrorShader.js"></script>
+    <script src="../assets/scripts/threejs/shaders/HorizontalBlurShader.js"></script>
     <script src="../assets/scripts/threejs/postprocessing/AdaptiveToneMappingPass.js"></script>
     <script src="../assets/scripts/threejs/postprocessing/BloomPass.js"></script>
     <script src="../assets/scripts/threejs/postprocessing/BokehPass.js"></script>
@@ -87,6 +90,8 @@
     <script src="../assets/scripts/classes/Background.js"></script>
     <script src="../assets/scripts/classes/Logo.js"></script>
     <script src="../assets/scripts/classes/ScrollerManager.js"></script>
+    <script src="../assets/scripts/classes/LogoManager.js"></script>
+    <script src="../assets/scripts/classes/BackgroundManager.js"></script>
     <script src="index.js"></script>
     
   </body>

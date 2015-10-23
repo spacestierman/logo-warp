@@ -61,7 +61,6 @@ Scroller.prototype = {
 		var nowTicks = new Date().getTime();
 		var totalElapsedMilliseconds = this._startedAt - this._lastRenderTicks;
 		
-		  
 		this._foregroundContext.clearRect(0, 0, this._foregroundCanvas.width, this._foregroundCanvas.height);
 		this._foregroundContext.save();
 		this._foregroundContext.globalCompositeOperation = "source-over";
@@ -74,7 +73,7 @@ Scroller.prototype = {
 		 
 		this._temporaryContext.clearRect(0, 0, this._temporaryCanvas.width, this._temporaryCanvas.height);
 		this._temporaryContext.globalCompositeOperation = "destination-over";
-		this._temporaryContext.drawImage(this._backgroundSource, 0, 0);
+		
 		this._temporaryContext.drawImage(this._backgroundCanvas, 0, -this.params.scrollSpeed); // Shift the background around
 		  
 		this._backgroundContext.clearRect(0, 0, this._backgroundCanvas.width, this._backgroundCanvas.height);
@@ -116,8 +115,12 @@ Scroller.prototype = {
 		  
 		  if (this._logo && this.params.showLogo)
 		  {
-			  this._compositeContext.globalCompositeOperation = "destination-out";
-			  this._compositeContext.drawImage(this._logo, 300, 300);
+			  this._compositeContext.globalCompositeOperation = "multiply";
+			  var origin = {
+				  x: Math.floor(this._backgroundCanvas.width / 2 - this._logo.width / 2),
+				  y: Math.floor(this._backgroundCanvas.height / 2 - this._logo.height / 2)
+			  }
+			  this._compositeContext.drawImage(this._logo, origin.x, origin.y);
 		  }
 		  
 		  this._compositeContext.restore();
@@ -126,7 +129,7 @@ Scroller.prototype = {
 		  {
 		    this._compositeContext.fillStyle = "red";
 		    
-		    var points = this._getLinePoints(this.params.scanAngle, this.params.brushX + this._undulatingCanvas.width / 2, -this.params.brushY);
+		    points = this._getLinePoints(this.params.scanAngle, this.params.brushX + this._undulatingCanvas.width / 2, -this.params.brushY);
 		    if (points.length > 0) // Points can be empty for completely vertical lines that have infinite slope
 		    {
 		      for(i=0; i<points.length; i++)
