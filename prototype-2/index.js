@@ -1,7 +1,13 @@
 /* global totalElapsedMilliseconds */
 $( document ).ready(function() {
-	if (canAttemptDynamicRender()) {
+	var _$experienceContainer = $('#homepage-experience');
+	var _$experienceRenderContainer = _$experienceContainer.find('.homepage-experience-render');
+	var _$experienceVideoContainer = _$experienceContainer.find('.homepage-experience-fallback');
 	
+	if (!canAttemptDynamicRender()) {
+		_$experienceVideoContainer.removeClass('hidden');
+	}
+	else {
 		var _logo = document.getElementById("logo");
 		if (_logo == null)
 		{
@@ -22,8 +28,7 @@ $( document ).ready(function() {
 	    var _meter = new FPSMeter(fpsContainer);
 		
 		var _numberOfUnperformantFrames = 0;
-		var _$experienceContainer = $('#homepage-experience');
-		var _$experienceRenderContainer = _$experienceContainer.find('.homepage-experience-render');
+
 		buildElementsToWindowWidthAndAddToDom();
 		
 		//document.body.appendChild(_scrollerManager.getScrollerCanvas());

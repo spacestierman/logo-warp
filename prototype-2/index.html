@@ -2,45 +2,70 @@
 <html>
   <head>
     <style>
-    html, body {
-      height: 100%;
-      margin: 0;
-    }
-    
-    body {
-      background: #000000;
-      overflow: hidden;
-    }
-    
-    #homepage-experience {
-      position: absolute;
-      min-width: 100%;
-      max-width: 100%;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-    }
-    
-    #homepage-experience canvas {
-      background: white;
-      display: block;
-      margin: 1px auto;
-    }
-    
-    #homepage-experience #fpsContainer {
-      position: fixed;
-      top:0;
-      left: 0;
-    }
-    
-    #homepage-experience img {
-      display: none;
-    }
+      html, body {
+        height: 100%;
+        margin: 0;
+      }
+      
+      body {
+        background: #000000;
+        overflow: hidden;
+      }
+      
+      #homepage-experience {
+        position: absolute;
+        min-width: 100%;
+        max-width: 100%;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+      
+      #homepage-experience .homepage-experience-fallback {
+        height: 100vh;  
+      }
+      
+      #homepage-experience .homepage-experience-fallback video {
+        transform: translateX(-50%) translateY(-50%);
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        min-width: 100%;
+        min-height: 100%;
+        width: auto;
+        height: auto;
+      }
+      
+      #homepage-experience canvas {
+        background: white;
+        display: block;
+        margin: 1px auto;
+      }
+      
+      #homepage-experience #fpsContainer {
+        position: fixed;
+        top:0;
+        left: 0;
+      }
+      
+      #homepage-experience img {
+        display: none;
+      }
+      
+      body .hidden {
+        display: none;
+      }
     </style>
   </head>
   <body id="body">
     <div id="homepage-experience">
       <div class="homepage-experience-render"></div>
+      <div class="homepage-experience-fallback hidden">
+        <video preload="auto" autoplay muted loop poster="../assets/images/video-poster.jpg">
+          <source src="../assets/images/video.webm" type="video/webm" />
+          <source src="../assets/images/video.mp4" type="video/mp4" />
+        </video>
+      </div>
       <div id="fpsContainer"></div>
       <img id="logo-large" src="../assets/images/logo-large.png" />
       <img id="logo" src="../assets/images/logo.png" />
