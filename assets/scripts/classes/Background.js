@@ -20,6 +20,8 @@ var Background = function(width, height, tile, messages) {
 	
 	this._tile = tile;
 	this._messages = messages;
+	this._messageIndex = 0;
+	this._lastMessageStart = new Date().getTime();
 }
 
 Background.prototype = {
@@ -47,32 +49,59 @@ Background.prototype = {
 			x: 0,
 			y: 0	
 		};
-		var currentMessageIndex = 0;
+		
+		var now = new Date().getTime();
+		if (now - this._lastMessageStart > 10000) {
+			this._messageIndex++;
+			if (this._messageIndex > this._messages.length - 1)
+			{
+				this._messageIndex = 0;
+			}
+			this._lastMessageStart = now;
+		} 
+		
+		var currentMessage = this._messages[this._messageIndex];
+		this.parameters.fontSizeInPixels = this._calculateMessageFontSizeInPixels(currentMessage);
+		this.parameters.stepHeightInPixels = this._calculateAppropriateStepHeight(this.parameters.fontSizeInPixels); 
 		while(current.y <= this._canvas.height)
 		{
 			current.x = 0;
 			
 			while(current.x <= this._canvas.width)
 			{
-				var message = this._messages[currentMessageIndex];
-				
-				y: 100 + totalElapsedMilliseconds / 1000;
-				
-				this._context.font = (this.parameters.fontSizeInPixels * 5) + "px sans-serif";
+				this._context.font = this._buildFontDeclaration(this.parameters.fontSizeInPixels);
 				this._context.fillStyle = this._getRandomColor(this.parameters.fontAlpha);
-				this._context.fillText(message, current.x, current.y);
+				this._context.fillText(currentMessage, current.x, current.y);
 				
-				var metrics = this._context.measureText(message);
+				var metrics = this._context.measureText(currentMessage);
 				current.x += metrics.width;
-				currentMessageIndex++;
-				if (currentMessageIndex >= this._messages.length) {
-					currentMessageIndex = 0;
-				}
 			}
 			
 			current.y += this.parameters.stepHeightInPixels;
 		}
+	},
+	
+	_calculateMessageFontSizeInPixels: function(message) {
+		var fontSizeInPixels = 100;
+		this._context.font = this._buildFontDeclaration(fontSizeInPixels);
+		var metrics = this._context.measureText(message);
+		var iterations = 0;
+		while (metrics.width > this._canvas.width && iterations < 10) {
+			fontSizeInPixels = Math.floor(fontSizeInPixels / 2.0);
+			this._context.font = this._buildFontDeclaration(fontSizeInPixels);
+			metrics = this._context.measureText(message);
+			iterations++;
+		}
 		
+		return fontSizeInPixels;
+	},
+	
+	_calculateAppropriateStepHeight: function(fontSizeInPixels) {
+		return fontSizeInPixels;
+	},
+	
+	_buildFontDeclaration: function(fontSizeInPixels) {
+		return fontSizeInPixels + "px sans-serif";
 	},
 	
 	_renderBackgroundWords: function(totalElapsedMilliseconds) {

@@ -1,8 +1,8 @@
-var ScrollerManager = function(background, undulatingCanvas, logo) {
+var ScrollerManager = function(background, undulatingCanvas, logo, width, height) {
 	this._background = background;
 	this._logo = logo;
 	
-	this._scroller = new Scroller(window.innerWidth, window.innerHeight, undulatingCanvas, null, logo);
+	this._scroller = new Scroller(width, height, undulatingCanvas, null, logo);
 	this._scroller.params.showLogo = false;
 	this._scroller.params.scrollSpeed = 5;
 	this._scroller.params.scanHeight = 100;

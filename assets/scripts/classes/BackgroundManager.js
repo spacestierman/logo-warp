@@ -1,4 +1,4 @@
-var BackgroundManager = function() {
+var BackgroundManager = function(width, height) {
 	var fuzz = document.getElementById("fuzz");
 	var messages = [
 		"Can you ever really know yourself? ",
@@ -9,7 +9,7 @@ var BackgroundManager = function() {
 		"You are a changeling, bold and vibrating with energy. ",
 		"From destruction to evolution, your star will never die. "
 	];
-	this._background = new Background(window.innerWidth, window.innerHeight, fuzz, messages);
+	this._background = new Background(width, height, fuzz, messages);
 	this._background.getParameters().stepHeightInPixels = 50;
 	this._background.getParameters().fontAlpha = 0.07;
 	
@@ -45,9 +45,9 @@ BackgroundManager.prototype = {
 		var gui = new dat.GUI();
 		
 		var backgroundFolder = gui.addFolder("Background");
-		backgroundFolder.add(this._background.getParameters(), "fontSizeInPixels", 1, 30).name("Font Size");
-		backgroundFolder.add(this._background.getParameters(), "fontAlpha", 0.01, 1.0).name("Font Alpha");
-		backgroundFolder.add(this._background.getParameters(), "stepHeightInPixels", 1, 100).name("Step Height");
+		backgroundFolder.add(this._background.getParameters(), "fontSizeInPixels", 1, 100).listen().name("Font Size");
+		backgroundFolder.add(this._background.getParameters(), "fontAlpha", 0.01, 1.0).listen().name("Font Alpha");
+		backgroundFolder.add(this._background.getParameters(), "stepHeightInPixels", 1, 100).listen().name("Step Height");
 		//backgroundFolder.open();
 		
 		var rgbGui = gui.addFolder('RGB Split');

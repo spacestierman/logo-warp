@@ -6,44 +6,47 @@
       height: 100%;
       margin: 0;
     }
+    
     body {
       background: #000000;
       overflow: hidden;
     }
     
-    canvas { 
+    #homepage-experience {
+      position: absolute;
+      min-width: 100%;
+      max-width: 100%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+    
+    #homepage-experience canvas {
       background: white;
       display: block;
       margin: 1px auto;
     }
     
-    #fpsContainer {
+    #homepage-experience #fpsContainer {
       position: fixed;
       top:0;
       left: 0;
     }
     
-    img {
+    #homepage-experience img {
       display: none;
-    }
-    
-    img#logo-large {
-      /*display: block;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);*/
     }
     </style>
   </head>
   <body id="body">
-    <div id="fpsContainer"></div>
+    <div id="homepage-experience">
+      <div class="homepage-experience-render"></div>
+      <div id="fpsContainer"></div>
+      <img id="logo-large" src="../assets/images/logo-large.png" />
+      <img id="logo" src="../assets/images/logo.png" />
+      <img id="fuzz" src="../assets/images/fuzz.png" />
+    </div>
     
-    <img id="logo-large" src="../assets/images/logo-large.png" />
-    <img id="logo" src="../assets/images/logo.png" />
-    <img id="fuzz" src="../assets/images/fuzz.png" />
-    
-    <script src="../assets/scripts/jquery-1.11.3.min.js"></script>
     <script src="../assets/scripts/threejs/three.js"></script>
     <script src="../assets/scripts/threejs/shaders/RGBShiftShader.js"></script>
     <script src="../assets/scripts/threejs/shaders/BleachBypassShader.js"></script>
@@ -67,21 +70,10 @@
     <script src="../assets/scripts/threejs/postprocessing/TexturePass.js"></script>
     <script src="../assets/scripts/threejs/postprocessing/EffectComposer.js"></script>
     
+    <script src="../assets/scripts/jquery-1.11.3.min.js"></script>
+    <script src="../assets/scripts/modernizr.dev.min.js"></script> <!-- TODO: replace with a stripped down version -->
     <script src="../assets/scripts/dat.gui.min.js"></script>
     <script src="../assets/scripts/fpsmeter.min.js"></script>
-    <script>
-      $( document ).ready(function() {
-        var fpsContainer = document.getElementById('fpsContainer');
-        var meter = new FPSMeter(fpsContainer);
-        
-        function render() {
-          requestAnimationFrame(render);
-          meter.tick();
-        }
-        
-        render();
-      });
-    </script>
     
     <script src="../assets/scripts/classes/UndulatingLogo.js"></script>
     <script src="../assets/scripts/classes/Scroller.js"></script>
