@@ -6,7 +6,6 @@ var Scroller = function(width, height, canvas, background, logo) {
 		wipeAlpha: this.DEFAULT_WIPE_ALPHA,
 		scanAngle: 0.0,
 		scanHeight: 20.0,
-		debug: false,
 		showLogo: true,
 		brushAngle: 0.0,
 		brushX: 0.0,
@@ -124,21 +123,6 @@ Scroller.prototype = {
 		  }
 		  
 		  this._compositeContext.restore();
-		  
-		  if (this.params.debug)
-		  {
-		    this._compositeContext.fillStyle = "red";
-		    
-		    points = this._getLinePoints(this.params.scanAngle, this.params.brushX + this._undulatingCanvas.width / 2, -this.params.brushY);
-		    if (points.length > 0) // Points can be empty for completely vertical lines that have infinite slope
-		    {
-		      for(i=0; i<points.length; i++)
-		      {
-		        var point = points[i];
-		        this._compositeContext.fillRect(point.x, point.y, 1, 1);
-		      }
-		    }
-		  }
 		  
 		  this._t++;
 		  this._lastRenderTicks = new Date().getTime();

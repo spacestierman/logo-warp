@@ -55,12 +55,16 @@ ScrollerManager.prototype = {
 		this._compositeContext.drawImage(this._background, 0, 0);
 		this._compositeContext.drawImage(this._scrollerWithEffects.getOutputCanvas(), 0, 0);
 		
+		var logoScale = this._calculateLogoScale();
+		
 		var logoAt = {
-			x: Math.floor(this._composite.width / 2 - this._logo.width / 2),
-			y: Math.floor(this._composite.height / 2 - this._logo.height / 2),
+			x: Math.floor(this._composite.width / 2 - this._logo.width * logoScale / 2),
+			y: Math.floor(this._composite.height / 2 - this._logo.height * logoScale / 2),
 		};
 		
-		this._compositeContext.drawImage(this._logo, logoAt.x, logoAt.y);
+		this._compositeContext.translate(logoAt.x, logoAt.y);
+		this._compositeContext.scale(logoScale, logoScale);
+		this._compositeContext.drawImage(this._logo, 0, 0);
 		
 		this._compositeContext.restore();
 	},
@@ -69,7 +73,6 @@ ScrollerManager.prototype = {
 		var gui = new dat.GUI();
 		
 		var scrollerGui = gui.addFolder('Scroller');
-		scrollerGui.add(this._scroller.params, 'debug')
 		scrollerGui.add(this._scroller.params, "showLogo");
 		scrollerGui.add(this._scroller.params, "scrollSpeed", 0.01, 20).name("Scroll Speed");
 		scrollerGui.add(this._scroller.params, "wipeAlpha", 0.01, 1.0).name("Wipe Alpha");
@@ -132,5 +135,16 @@ ScrollerManager.prototype = {
 		this._scrollerWithEffects.maybeAddPass(this._tvShader.getShader(), this._tvShader.getParameters().show);
 		this._scrollerWithEffects.maybeAddPass(this._staticShader.getShader(), this._staticShader.getParameters().show);
 		this._scrollerWithEffects.maybeAddPass(this._filmShader.getShader(), this._filmShader.getParameters().show);
+	},
+	
+	_calculateLogoScale: function() {
+		var ratioWidth = this._composite.width / this._logo.width;
+		ratioWidth = Math.min(1.0, ratioWidth);
+		
+		var ratioHeight = this._composite.height / this._logo.height;
+		ratioHeight = Math.min(1.0, ratioHeight);
+		
+		var lowestRatio = Math.min(ratioWidth, ratioHeight);
+		return lowestRatio;
 	}
 };

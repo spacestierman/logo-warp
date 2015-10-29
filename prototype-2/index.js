@@ -4,9 +4,7 @@ $( document ).ready(function() {
 	var _$experienceRenderContainer = _$experienceContainer.find('.homepage-experience-render');
 	var _$fallbackContainer = _$experienceContainer.find('.homepage-experience-fallback');
 	
-	var FPS_SAMPLE_SIZE = 32;
-	var FPS_MINIMUM_AVERAGE_TO_DISPLAY_RENDERING = 32;
-	var _fpsHistory = new FpsHistory(FPS_SAMPLE_SIZE);
+	var _fpsHistory = new FpsHistory(32);
 	
 	if (!canAttemptDynamicRender()) {
 		showVideo();
@@ -92,9 +90,6 @@ $( document ).ready(function() {
 		_t += 0.1;
 		_currentFrame += 1;
 		
-		var duration = new Date().getTime() - nowTicks;
-		console.log("duration: " + duration);
-		
 		var continueAnimating = true;
 		if (!_hasHadPerformantFramerate) // Once we've had a performant chunk of frames, we're going to believe that all subsequent frames can be good.
 		{
@@ -118,40 +113,10 @@ $( document ).ready(function() {
 		
 		_meter.tick();
 		_fpsHistory.log(_meter.duration, _meter.fps);
-		console.log("fps: " + _meter.fps + ", duration: " + _meter.duration);
+		
 		if (continueAnimating) {
 			requestAnimationFrame(render);
 		}
-	}
-	
-	function getAverageFpsHistory() {
-		if (_fpsHistory.length <= 0) {
-			return 0.0;
-		}
-		
-		var sum = 0.0;
-		for(var i=0; i<_fpsHistory.length; i++) {
-			sum += _fpsHistory[i];
-		}
-		
-		return sum / _fpsHistory.length;
-	}
-	
-	function getAverageFpsOfLastFrames(numberOfLastFrames) {
-		if (numberOfLastFrames <= 0)
-		{
-			throw "Must specify a positive integer.";
-		}
-		if (numberOfLastFrames > _fpsHistory.length ) {
-			throw "Not enough frames.";
-		}
-		
-		var sum = 0.0;
-		for(var i=_fpsHistory.length - numberOfLastFrames; i<_fpsHistory.length; i++) {
-			sum += _fpsHistory[i];
-		}
-		
-		return sum / _fpsHistory.length;
 	}
 	
 	function buildElementsToWindowWidthAndAddToDom() {
