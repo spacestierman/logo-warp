@@ -8,7 +8,7 @@
       }
       
       body {
-        background: #000000;
+        background: white;
         overflow: hidden;
       }
       
@@ -55,17 +55,32 @@
       body .hidden {
         display: none;
       }
+      
+      .homepage-experience-preload {
+        position: fixed;
+        min-width: 100%;
+        max-width: 100%;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+      
+      .homepage-experience-preload img {
+        display:block;
+        margin: 0 auto;
+      }
     </style>
   </head>
   <body id="body">
     <div id="homepage-experience">
-      <div class="homepage-experience-render"></div>
-      <div class="homepage-experience-fallback hidden">
-        <video preload="auto" autoplay muted loop poster="../assets/images/video-poster.jpg">
+      <div class="homepage-experience-render hidden"></div>
+      <div class="homepage-experience-fallback">
+        <video preload="auto" autoplay="autoplay" muted="muted" loop="loop" poster="../assets/images/video-poster.jpg">
           <source src="../assets/images/video.webm" type="video/webm" />
           <source src="../assets/images/video.mp4" type="video/mp4" />
         </video>
       </div>
+      
       <div id="fpsContainer"></div>
       <img id="logo-large" src="../assets/images/logo-large.png" />
       <img id="logo" src="../assets/images/logo.png" />
@@ -96,6 +111,7 @@
     <script src="../assets/scripts/threejs/postprocessing/EffectComposer.js"></script>
     
     <script src="../assets/scripts/jquery-1.11.3.min.js"></script>
+    <script src="../assets/scripts/jquery.konami.min.js"></script>
     <script src="../assets/scripts/modernizr.dev.min.js"></script> <!-- TODO: replace with a stripped down version -->
     <script src="../assets/scripts/dat.gui.min.js"></script>
     <script src="../assets/scripts/fpsmeter.min.js"></script>
@@ -109,6 +125,7 @@
     <script src="../assets/scripts/classes/ScrollerManager.js"></script>
     <script src="../assets/scripts/classes/LogoManager.js"></script>
     <script src="../assets/scripts/classes/BackgroundManager.js"></script>
+    <script src="../assets/scripts/classes/FpsHistory.js"></script>
     <script src="index.js"></script>
     
   </body>
