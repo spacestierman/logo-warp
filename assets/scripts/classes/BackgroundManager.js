@@ -1,4 +1,6 @@
-var BackgroundManager = function(width, height) {
+var BackgroundManager = function(width, height, interactionState) {
+	this._interactionState = interactionState;
+	
 	var fuzz = document.getElementById("fuzz");
 	var messages = [
 		"Can you ever really know yourself? ",
@@ -12,6 +14,7 @@ var BackgroundManager = function(width, height) {
 	this._background = new Background(width, height, fuzz, messages);
 	this._background.getParameters().stepHeightInPixels = 50;
 	this._background.getParameters().fontAlpha = 0.07;
+	this._backgroundAlphaToggle = new AccelerationToggle(this._background.getParameters(), "fontAlpha", 0.01, 0.5);
 	
 	this._backgroundWithEffects = new EffectsRenderer(this._background.getDomElement());
 	
@@ -35,6 +38,7 @@ BackgroundManager.prototype = {
 	},
 	
 	render: function(totalElapsedMilliseconds, deltaMilliseconds) {
+		this._backgroundAlphaToggle.update(this._interactionState.isKeyDown(KeyCodes.Y));
 		this._background.render(totalElapsedMilliseconds);
 		
 		this._updateShaderValues(totalElapsedMilliseconds, deltaMilliseconds);

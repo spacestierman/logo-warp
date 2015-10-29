@@ -19,9 +19,7 @@ $( document ).ready(function() {
 		var _undulating = new UndulatingLogo(_logo, 400, 150, "undulating");
 		var _undulatingCanvas = _undulating.getCanvas(); 
 	
-		var _backgroundManager = new BackgroundManager(window.innerWidth, window.innerHeight);
-		var _logoManager = new LogoManager();
-		var _scrollerManager = new ScrollerManager(_backgroundManager.getDomElement(), _undulatingCanvas, _logoManager.getDomElement(), window.innerWidth, window.innerHeight);
+		var _logoManager = new LogoManager(_interactionState);
 		
 		var _startedAt = new Date().getTime();
 		var _lastRenderTicks = _startedAt;
@@ -128,7 +126,7 @@ $( document ).ready(function() {
 	function buildElementsToWindowWidthAndAddToDom() {
 		_datGuiIsSetup = false; // When we rebuild the elements, we need to reset dat GUI
 		
-		_backgroundManager = new BackgroundManager(window.innerWidth, window.innerHeight);
+		_backgroundManager = new BackgroundManager(window.innerWidth, window.innerHeight, _interactionState);
 		_scrollerManager = new ScrollerManager(_backgroundManager.getDomElement(), _undulatingCanvas, _logoManager.getDomElement(), window.innerWidth, window.innerHeight, _interactionState);
 		
 		var outputCanvas = _scrollerManager.getDomElement();
