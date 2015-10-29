@@ -1,26 +1,39 @@
-var ScrollerManager = function(background, undulatingCanvas, logo, width, height) {
+var ScrollerManager = function(background, undulatingCanvas, logo, width, height, interactionState) {
 	this._background = background;
 	this._logo = logo;
+	this._interactionState = interactionState;
 	
 	this._scroller = new Scroller(width, height, undulatingCanvas, null, logo);
 	this._scroller.params.showLogo = false;
-	this._originalBrushX = this._scroller.params.brushX;
-	//this._scroller.params.scrollSpeed = 5;
-	//this._scroller.params.scanHeight = 100;
-	//this._scroller.params.brushY = 58;
-	//this._scroller.params.brushScaleX = 3.9;
-	//this._scroller.params.brushScaleY = 11.0;
-	//this._scroller.params.wipeAlpha = 0.01;
-	
 	this._scrollerWithEffects = new EffectsRenderer(this._scroller.getCanvas());
+	
+	this._showLogoToggle = new BooleanToggle(this._scroller.params, "showLogo");
+	this._scrollSpeedToggle = new AccelerationToggle(this._scroller.params, "scrollSpeed", 1.0, 20.0);
+	this._wipeAlphaToggle = new AccelerationToggle(this._scroller.params, "wipeAlpha", 0.05, 1.0);
+	this._scanHeightToggle = new AccelerationToggle(this._scroller.params, "scanHeight", 1.0, 100.0);
+	this._brushScaleXToggle = new AccelerationToggle(this._scroller.params, "brushScaleX", 1.0, 11.0);
+	this._brushScaleYToggle = new AccelerationToggle(this._scroller.params, "brushScaleY", 1.0, 11.0);
 	
 	this._rgbShader = new ShaderPassParameters(new THREE.ShaderPass(THREE.RGBShiftShader), true);
 	this._rgbShader.getParameters().angle = 6.0;
+	this._rbgAmountToggle = new AccelerationToggle(this._rgbShader.getParameters(), "amount", 0.001, 0.02);
 	
 	this._staticShader = new ShaderPassParameters(new THREE.ShaderPass(THREE.StaticShader), true);
 	this._staticShader.getParameters().show = false;
 	this._staticShader.getParameters().amount = 0.11;
+	this._staticShowToggle = new BooleanToggle(this._staticShader.getParameters(), "show", this._setupNewComposer.bind(this));
+	this._staticAmountToggle = new AccelerationToggle(this._staticShader.getParameters(), "amount", 0.001, 5.0);
+	this._staticSizeToggle = new AccelerationToggle(this._staticShader.getParameters(), "size", 1.0, 20.0);
+	
 	this._filmShader = new ShaderPassParameters(new THREE.ShaderPass(THREE.FilmShader), false);
+	this._filmShader.getParameters().show = false;
+	this._filmShader.getParameters().sCount = 1;
+	this._filmShader.getParameters().sIntensity = 1.0;
+	this._filmShowToggle = new BooleanToggle(this._filmShader.getParameters(), "show", this._setupNewComposer.bind(this));
+	this._filmNIntensityToggle = new AccelerationToggle(this._filmShader.getParameters(), "nIntensity", 0.01, 2.0);
+	this._filmSIntensityToggle = new AccelerationToggle(this._filmShader.getParameters(), "sIntensity", 0.01, 2.0);
+	this._filmLineToggle = new AccelerationToggle(this._filmShader.getParameters(), "sCount", 100, 4096);
+	
 	this._tvShader = new ShaderPassParameters(new THREE.ShaderPass(THREE.BadTVShader), true);
 	this._tvShader.getParameters().distortion = 11.1;
 	this._tvShader.getParameters().distortion2 = 0.0;
@@ -74,7 +87,7 @@ ScrollerManager.prototype = {
 		var gui = new dat.GUI();
 		
 		var scrollerGui = gui.addFolder('Scroller');
-		scrollerGui.add(this._scroller.params, "showLogo");
+		scrollerGui.add(this._scroller.params, "showLogo").listen();
 		scrollerGui.add(this._scroller.params, "scrollSpeed", 0.01, 20).listen().name("Scroll Speed");
 		scrollerGui.add(this._scroller.params, "wipeAlpha", 0.01, 1.0).listen().name("Wipe Alpha");
 		scrollerGui.add(this._scroller.params, "scanAngle", 0.01, Math.PI * 2).listen().name("Scan Angle");
@@ -93,21 +106,20 @@ ScrollerManager.prototype = {
 		//rgbGui.open();
 		
 		var staticGUI = gui.addFolder('Static');
-		staticGUI.add(this._staticShader.getParameters(), 'show').onChange(this._setupNewComposer.bind(this));
+		staticGUI.add(this._staticShader.getParameters(), 'show').listen().onChange(this._setupNewComposer.bind(this));
 		staticGUI.add(this._staticShader.getParameters(), 'amount', 0.0, 5.0).listen().name("Amount");
 		staticGUI.add(this._staticShader.getParameters(), 'size', 0.0, 20.0).listen().name("Size");
 		//staticGUI.open();
 		
 		var filmGUI = gui.addFolder('Film Shader');
-		filmGUI.add(this._filmShader.getParameters(), 'show').onChange(this._setupNewComposer.bind(this));
+		filmGUI.add(this._filmShader.getParameters(), 'show').listen().onChange(this._setupNewComposer.bind(this));
 		filmGUI.add(this._filmShader.getParameters(), 'nIntensity', 0.0, 2.0).listen().name("N Intensity");
 		filmGUI.add(this._filmShader.getParameters(), 'sIntensity', 0.0, 2.0).listen().step(0.1).name("S Intensity");
 		filmGUI.add(this._filmShader.getParameters(), 'sCount', 0, 4096).listen().name("Line Count");
-		filmGUI.add(this._filmShader.getParameters(), 'grayscale').listen().name("Is Greyscale?");
 		//filmGUI.open();
 		
 		var tvGui = gui.addFolder('Bad TV');
-		tvGui.add(this._tvShader.getParameters(), 'show').onChange(this._setupNewComposer.bind(this));
+		tvGui.add(this._tvShader.getParameters(), 'show').listen().onChange(this._setupNewComposer.bind(this));
 		tvGui.add(this._tvShader.getParameters(), 'distortion', 0.1, 20).listen().name("Thick Distort");
 		tvGui.add(this._tvShader.getParameters(), 'distortion2', 0.1, 20).listen().step(0.1).name("Fine Distort");
 		tvGui.add(this._tvShader.getParameters(), 'speed', 0.0, 1.0).listen().name("Distort Speed");
@@ -116,19 +128,33 @@ ScrollerManager.prototype = {
 	},
 	
 	_updateShaderValues: function(totalElapsedMilliseconds, deltaMilliseconds) {
+		this._scrollSpeedToggle.update(this._interactionState.isMouseDown() || this._interactionState.isKeyDown(KeyCodes.SPACEBAR));
+		this._wipeAlphaToggle.update(this._interactionState.isKeyDown(KeyCodes.W));
+		this._showLogoToggle.update(this._interactionState.isKeyDown(KeyCodes.S));
+		this._scanHeightToggle.update(this._interactionState.isKeyDown(KeyCodes.Q));
+		this._brushScaleXToggle.update(this._interactionState.isKeyDown(KeyCodes.E));
+		this._brushScaleYToggle.update(this._interactionState.isKeyDown(KeyCodes.M));
 		this._scroller.params.brushAngle = Math.sin(totalElapsedMilliseconds/ 10000) * 2 * Math.PI;
 		
+		this._staticShowToggle.update(this._interactionState.isKeyDown(KeyCodes.Z) || this._interactionState.isKeyDown(KeyCodes.X));
+		this._staticAmountToggle.update(this._interactionState.isKeyDown(KeyCodes.Z));
+		this._staticSizeToggle.update(this._interactionState.isKeyDown(KeyCodes.X));
 		this._staticShader.updateShaderToParameters({
 			time:  totalElapsedMilliseconds / 10000
 		});
 		
-		this._rgbShader.getParameters().angle = Math.sin(totalElapsedMilliseconds/ 5000) * 2 * Math.PI; 
+		this._rgbShader.getParameters().angle = Math.sin(totalElapsedMilliseconds/ 5000) * 2 * Math.PI;
+		this._rbgAmountToggle.update(this._interactionState.isKeyDown(KeyCodes.C)); 
 		this._rgbShader.updateShaderToParameters();
 		
 		this._tvShader.updateShaderToParameters({
 			time: totalElapsedMilliseconds / 10000
 		})
 		
+		this._filmShowToggle.update(this._interactionState.isKeyDown(KeyCodes.R) || this._interactionState.isKeyDown(KeyCodes.F) || this._interactionState.isKeyDown(KeyCodes.V));
+		this._filmNIntensityToggle.update(this._interactionState.isKeyDown(KeyCodes.R));
+		this._filmSIntensityToggle.update(this._interactionState.isKeyDown(KeyCodes.F));
+		this._filmLineToggle.update(this._interactionState.isKeyDown(KeyCodes.V));
 		this._filmShader.updateShaderToParameters({
 			time: totalElapsedMilliseconds / 10000
 		});

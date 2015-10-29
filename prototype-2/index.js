@@ -5,6 +5,7 @@ $( document ).ready(function() {
 	var _$fallbackContainer = _$experienceContainer.find('.homepage-experience-fallback');
 	
 	var _fpsHistory = new FpsHistory(32);
+	var _interactionState = new InteractionState();
 	
 	if (!canAttemptDynamicRender()) {
 		showVideo();
@@ -62,6 +63,11 @@ $( document ).ready(function() {
 			duration: 1000,
 			easing: "linear"	
 		});
+		
+		_$experienceRenderContainer.on('mousedown', onUserMouseDown);
+		_$experienceRenderContainer.on('mouseup', onUserMouseUp);
+		$(document).on('keydown', onUserKeyDown);
+		$(document).on('keyup', onUserKeyUp);
 	}
 	
 	function isShowingRender() {
@@ -123,7 +129,7 @@ $( document ).ready(function() {
 		_datGuiIsSetup = false; // When we rebuild the elements, we need to reset dat GUI
 		
 		_backgroundManager = new BackgroundManager(window.innerWidth, window.innerHeight);
-		_scrollerManager = new ScrollerManager(_backgroundManager.getDomElement(), _undulatingCanvas, _logoManager.getDomElement(), window.innerWidth, window.innerHeight);
+		_scrollerManager = new ScrollerManager(_backgroundManager.getDomElement(), _undulatingCanvas, _logoManager.getDomElement(), window.innerWidth, window.innerHeight, _interactionState);
 		
 		var outputCanvas = _scrollerManager.getDomElement();
 		var $outputCanvas = $(outputCanvas);
@@ -177,5 +183,22 @@ $( document ).ready(function() {
 		else {
 			dat.GUI.toggleHide();
 		}
+	}
+	
+	function onUserMouseDown(evt) {
+		_interactionState.setMouseDownState(true);
+	}
+	
+	function onUserMouseUp(evt) {
+		_interactionState.setMouseDownState(false);
+	}
+	
+	function onUserKeyDown(evt) {
+		console.log(evt.keyCode);
+		_interactionState.setKeyState(evt.keyCode, true);
+	}
+	
+	function onUserKeyUp(evt) {
+		_interactionState.setKeyState(evt.keyCode, false);
 	}
 });

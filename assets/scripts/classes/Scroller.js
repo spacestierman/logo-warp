@@ -1,9 +1,10 @@
 var Scroller = function(width, height, canvas, background, logo) {
 	this.DEFAULT_WIPE_ALPHA = 0.25;
+	this.DEFAULT_SCROLL_SPEED = 1.5;
 	
 	var defaultScaleX = width / canvas.width;
 	this.params = {
-		scrollSpeed: 1.5,
+		scrollSpeed: this.DEFAULT_SCROLL_SPEED,
 		wipeAlpha: this.DEFAULT_WIPE_ALPHA,
 		scanAngle: 0.0,
 		scanHeight: 20.0,
