@@ -120,6 +120,8 @@ $( document ).ready(function() {
 	}
 	
 	function buildElementsToWindowWidthAndAddToDom() {
+		_datGuiIsSetup = false; // When we rebuild the elements, we need to reset dat GUI
+		
 		_backgroundManager = new BackgroundManager(window.innerWidth, window.innerHeight);
 		_scrollerManager = new ScrollerManager(_backgroundManager.getDomElement(), _undulatingCanvas, _logoManager.getDomElement(), window.innerWidth, window.innerHeight);
 		
@@ -147,7 +149,11 @@ $( document ).ready(function() {
 	}
 	
 	function listenForWindowResizing() {
-		$(window).resize(buildElementsToWindowWidthAndAddToDom);
+		$(window).resize(onWindowResize);
+	}
+	
+	function onWindowResize() {
+		buildElementsToWindowWidthAndAddToDom();
 	}
 	
 	function listenForKonamiCode() {

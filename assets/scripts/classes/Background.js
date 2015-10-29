@@ -65,7 +65,7 @@ Background.prototype = {
 		this.parameters.stepHeightInPixels = this._calculateAppropriateStepHeight(this.parameters.fontSizeInPixels); 
 		while(current.y <= this._canvas.height)
 		{
-			current.x = 0;
+			current.x = Math.random() * 100;
 			
 			while(current.x <= this._canvas.width)
 			{
@@ -97,7 +97,7 @@ Background.prototype = {
 	},
 	
 	_calculateAppropriateStepHeight: function(fontSizeInPixels) {
-		return fontSizeInPixels;
+		return fontSizeInPixels * 0.75;
 	},
 	
 	_buildFontDeclaration: function(fontSizeInPixels) {
