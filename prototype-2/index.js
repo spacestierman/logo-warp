@@ -4,22 +4,33 @@ $( document ).ready(function() {
 	var _$experienceRenderContainer = _$experienceContainer.find('.homepage-experience-render');
 	var _$fallbackContainer = _$experienceContainer.find('.homepage-experience-fallback');
 	
-	var _fpsHistory = new FpsHistory(32);
+	var _fpsHistory = new FpsHistory(30);
 	var _interactionState = new InteractionState();
 	
 	if (!canAttemptDynamicRender()) {
 		showVideo();
 	}
 	else {
+		var _renderModel = new RenderModel();
+		
 		var _logo = document.getElementById("logo");
 		if (_logo == null)
 		{
 			throw "no logo";
 		}
 		var _undulating = new UndulatingLogo(_logo, 400, 150, "undulating");
-		var _undulatingCanvas = _undulating.getCanvas(); 
+		var _undulatingCanvas = _undulating.getCanvas();
+		document.body.appendChild(_undulatingCanvas);
 	
-		var _logoManager = new LogoManager(_interactionState);
+		var _logoManager = null;
+		if (canDisplayFrontAndCenterLogo())
+		{
+			_logoManager = new LogoManager(_interactionState);
+		}
+		else 
+		{
+			$(document.body).addClass("logo-fallback");
+		}
 		
 		var _startedAt = new Date().getTime();
 		var _lastRenderTicks = _startedAt;
@@ -73,21 +84,29 @@ $( document ).ready(function() {
 	}
 	
 	function canAttemptDynamicRender() {
-		return Modernizr.webgl && Modernizr.canvas && Modernizr.canvastext && Modernizr.requestanimationframe && Modernizr.canvasblending;
+		return true;
+		return Modernizr.webgl && Modernizr.canvas && Modernizr.canvastext && Modernizr.requestanimationframe;
 	}
-		
+	
+	function canDisplayFrontAndCenterLogo() {
+		return Modernizr.canvasblending;
+	}
+	
 	function render() 
 	{
 		_meter.tickStart();
 		
-		var nowTicks = new Date().getTime();
+		var start = new Date().getTime();
 		var totalElapsedMilliseconds = _lastRenderTicks - _startedAt;
-		var deltaMilliseconds = nowTicks - _lastRenderTicks;
+		var deltaMilliseconds = start - _lastRenderTicks;
 		
 		_undulating.render(totalElapsedMilliseconds);
 		
 		_backgroundManager.render(totalElapsedMilliseconds, deltaMilliseconds);
-		_logoManager.render(totalElapsedMilliseconds, deltaMilliseconds);
+		if (_logoManager) 
+		{
+			_logoManager.render(totalElapsedMilliseconds, deltaMilliseconds);
+		}
 		_scrollerManager.render(totalElapsedMilliseconds, deltaMilliseconds);
 		
 		_lastRenderTicks = new Date().getTime();
@@ -110,7 +129,9 @@ $( document ).ready(function() {
 				else if (averageDurationInMilliseconds <= twentyFourFpsDuration)
 				{ /* Continue tracking, but don't stop checking */ }
 				else { // If the average duration sucks, then we don't need to track anything further.  It will never improve.
-					continueAnimating = false;
+					//continueAnimating = false;
+					_hasHadPerformantFramerate = true;
+					showRender();
 				}
 			}
 		}
@@ -121,13 +142,25 @@ $( document ).ready(function() {
 		if (continueAnimating) {
 			requestAnimationFrame(render);
 		}
+		
+		var end = new Date().getTime();
+		var duration = end - start;
+		console.log("Total render time: " + duration + "ms");
 	}
 	
 	function buildElementsToWindowWidthAndAddToDom() {
 		_datGuiIsSetup = false; // When we rebuild the elements, we need to reset dat GUI
 		
-		_backgroundManager = new BackgroundManager(window.innerWidth, window.innerHeight, _interactionState);
-		_scrollerManager = new ScrollerManager(_backgroundManager.getDomElement(), _undulatingCanvas, _logoManager.getDomElement(), window.innerWidth, window.innerHeight, _interactionState);
+		var useWidth = window.innerWidth;
+		var useHeight = window.innerHeight;
+		
+		_backgroundManager = new BackgroundManager(useWidth, useHeight, _interactionState);
+		
+		var logoCanvas = null;
+		if (_logoManager) {
+			logoCanvas = _logoManager.getDomElement();
+		}
+		_scrollerManager = new ScrollerManager(_backgroundManager.getDomElement(), _undulatingCanvas, logoCanvas, useWidth, useHeight, _interactionState);
 		
 		var outputCanvas = _scrollerManager.getDomElement();
 		var $outputCanvas = $(outputCanvas);

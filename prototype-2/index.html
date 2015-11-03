@@ -9,13 +9,16 @@
       
       body {
         background: white;
-        overflow: hidden;
+        /*overflow: hidden;*/
       }
       
       #homepage-experience {
+        background-image: url('../assets/images/pattern.gif');
         position: absolute;
         min-width: 100%;
         max-width: 100%;
+        width: 100%;
+        height: 100%;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
@@ -73,6 +76,14 @@
         display:block;
         margin: 0 auto;
       }
+      
+      #undulating {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 100;
+        background-color: white;
+      }
     </style>
   </head>
   <body id="body">
@@ -120,6 +131,7 @@
     <script src="../assets/scripts/fpsmeter.min.js"></script>
     
     <script src="../assets/scripts/classes/KeyCodes.js"></script>
+    <script src="../assets/scripts/classes/RenderModel.js"></script>
     <script src="../assets/scripts/classes/AccelerationToggle.js"></script>
     <script src="../assets/scripts/classes/SetValueToggle.js"></script>
     <script src="../assets/scripts/classes/BooleanToggle.js"></script>

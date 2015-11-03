@@ -57,6 +57,8 @@ ScrollerManager.prototype = {
 	},
 	
 	render: function(totalElapsedMilliseconds, deltaMilliseconds) {
+		var start = new Date().getTime();
+		
 		this._updateShaderValues(totalElapsedMilliseconds, deltaMilliseconds);
 		
 		this._scroller.render();
@@ -69,18 +71,24 @@ ScrollerManager.prototype = {
 		this._compositeContext.drawImage(this._background, 0, 0);
 		this._compositeContext.drawImage(this._scrollerWithEffects.getOutputCanvas(), 0, 0);
 		
-		var logoScale = this._calculateLogoScale();
-		
-		var logoAt = {
-			x: Math.floor(this._composite.width / 2 - this._logo.width * logoScale / 2),
-			y: Math.floor(this._composite.height / 2 - this._logo.height * logoScale / 2),
-		};
-		
-		this._compositeContext.translate(logoAt.x, logoAt.y);
-		this._compositeContext.scale(logoScale, logoScale);
-		this._compositeContext.drawImage(this._logo, 0, 0);
+		if (this._logo) {
+			var logoScale = this._calculateLogoScale();
+			
+			var logoAt = {
+				x: Math.floor(this._composite.width / 2 - this._logo.width * logoScale / 2),
+				y: Math.floor(this._composite.height / 2 - this._logo.height * logoScale / 2),
+			};
+			
+			this._compositeContext.translate(logoAt.x, logoAt.y);
+			this._compositeContext.scale(logoScale, logoScale);
+			this._compositeContext.drawImage(this._logo, 0, 0);
+		}
 		
 		this._compositeContext.restore();
+		
+		var end = new Date().getTime();
+		var duration = end - start;
+		console.log("Scroll render duration: " + duration + "ms");
 	},
 	
 	showDatGUI: function() {
@@ -168,6 +176,10 @@ ScrollerManager.prototype = {
 	},
 	
 	_calculateLogoScale: function() {
+		if (!this._logo) {
+			return 1.0;
+		}
+		
 		var ratioWidth = this._composite.width / this._logo.width;
 		ratioWidth = Math.min(1.0, ratioWidth);
 		

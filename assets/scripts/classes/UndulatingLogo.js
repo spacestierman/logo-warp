@@ -20,6 +20,7 @@ var UndulatingLogo = function(image, width, height, id) {
 
 UndulatingLogo.prototype = {
 	render: function(elapsedMilliseconds) {
+		var start = new Date().getTime();
 		this._context.clearRect(0, 0, this._canvas.width, this._canvas.height);
 		
 		var shrinkageFactor = 2;
@@ -32,6 +33,10 @@ UndulatingLogo.prototype = {
 			this._drawToSliceCanvas(angle, this._blackCanvas, y * shrinkageFactor);
 			this._context.drawImage(this._sliceCanvas, offset + displaceStrength, drawAtY);
 		}
+		
+		var end = new Date().getTime();
+		var duration = end - start;
+		console.log("Undulating Logo duration: " + duration + "ms");
 	},
 	
 	getCanvas: function() {

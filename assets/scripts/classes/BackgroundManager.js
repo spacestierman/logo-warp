@@ -38,11 +38,17 @@ BackgroundManager.prototype = {
 	},
 	
 	render: function(totalElapsedMilliseconds, deltaMilliseconds) {
+		var start = new Date().getTime();
+		
 		this._backgroundAlphaToggle.update(this._interactionState.isKeyDown(KeyCodes.Y));
 		this._background.render(totalElapsedMilliseconds);
 		
 		this._updateShaderValues(totalElapsedMilliseconds, deltaMilliseconds);
 		this._backgroundWithEffects.render(totalElapsedMilliseconds);
+		
+		var end = new Date().getTime();
+		var duration = end - start;
+		console.log("BackgroundManager render duration: " + duration + "ms");
 	},
 	
 	showDatGUI: function() {

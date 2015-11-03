@@ -34,10 +34,15 @@ LogoManager.prototype = {
 	},
 	
 	render: function(totalElapsedMilliseconds, deltaMilliseconds) {
+		var start = new Date().getTime();
 		this._logoMain.render(totalElapsedMilliseconds);
 		
 		this._updateShaderValues(totalElapsedMilliseconds, deltaMilliseconds);
 		this._logoMainWithEffects.render(totalElapsedMilliseconds);
+		
+		var end = new Date().getTime();
+		var duration = end - start;
+		console.log("Main Logo render duration: " + duration + "ms");
 	},	
 	
 	showDatGUI: function() {
